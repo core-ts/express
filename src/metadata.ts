@@ -20,7 +20,6 @@ export interface Attribute {
   format?: FormatType;
   required?: boolean;
   key?: boolean;
-  nopatch?: boolean;
   length?: number;
   min?: number;
   max?: number;
