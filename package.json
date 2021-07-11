@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com/common-ts/express"
+    "url": "git@github.com/core-ts/express"
   },
   "keywords": [
     "express",
