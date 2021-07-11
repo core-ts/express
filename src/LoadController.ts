@@ -1,10 +1,10 @@
 import {Request, Response} from 'express';
-import {Attribute, Attributes, Model} from './metadata';
+import {Attribute, Attributes} from './metadata';
 import {handleError} from './response';
 import {buildId, buildKeys} from './view';
 
 export interface ViewService<T, ID> {
-  metadata?(): Model;
+  metadata?(): Attributes;
   load(id: ID, ctx?: any): Promise<T>;
 }
 function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>)): (id: ID, ctx?: any) => Promise<T> {
@@ -36,7 +36,7 @@ function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: an
   if (typeof viewService !== 'function' && viewService.metadata) {
     const metadata = viewService.metadata();
     if (metadata) {
-      return buildKeys(metadata.attributes);
+      return buildKeys(metadata);
     }
   }
   return undefined;
@@ -52,13 +52,13 @@ export class LoadController<T, ID> {
   load(req: Request, res: Response) {
     const id = buildId<ID>(req, this.keys);
     if (!id) {
-      return res.status(400).end('invalid parameters');
+      return res.status(400).send('invalid parameters');
     }
     this.view(id).then(obj => {
       if (obj) {
-        res.status(200).json(obj);
+        res.status(200).json(obj).end();
       } else {
-        res.status(404).json(null);
+        res.status(404).json(null).end();
       }
     }).catch(err => handleError(err, res, this.log));
   }

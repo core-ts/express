@@ -27,7 +27,7 @@ export interface Attribute {
   lt?: number;
   exp?: RegExp|string;
   code?: string;
-  typeof?: Model;
+  typeof?: Attributes;
 }
 export interface Attributes {
   [key: string]: Attribute;

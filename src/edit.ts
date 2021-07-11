@@ -66,15 +66,15 @@ export function create<T>(res: Response, status: StatusConfig, obj: T, insert: (
     if (typeof result === 'number') {
       if (result >= 1) {
         const r: ResultInfo<T> = {status: status.success, value: obj};
-        res.status(201).json(r);
+        res.status(201).json(r).end();
       } else if (result === 0) {
         const r: ResultInfo<T> = {status: status.duplicate_key};
-        res.status(201).json(r);
+        res.status(201).json(r).end();
       } else {
-        res.status(500).end('Internal Server Error');
+        res.status(500).send('Internal Server Error');
       }
     } else {
-      res.status(200).json(result);
+      res.status(200).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }
@@ -83,16 +83,16 @@ export function update<T>(res: Response, status: StatusConfig, obj: T, save: (ob
     if (typeof result === 'number') {
       if (result >= 1) {
         const r: ResultInfo<T> = {status: status.success, value: obj};
-        res.status(201).json(r);
+        res.status(201).json(r).end();
       } else if (result === 0) {
         const r: ResultInfo<T> = {status: status.not_found};
-        res.status(404).json(r);
+        res.status(404).json(r).end();
       } else {
         const r: ResultInfo<T> = {status: status.not_found};
-        res.status(409).json(r);
+        res.status(409).json(r).end();
       }
     } else {
-      res.status(200).json(result);
+      res.status(200).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }
