@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
+import {handleError} from './http';
 import {LoadController, ViewService} from './LoadController';
 import {Attribute, Attributes} from './metadata';
-import {handleError} from './response';
 import {format, fromRequest, getParameters, initializeConfig, jsonResult, Metadata, SearchConfig, SearchModel, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
@@ -28,11 +28,11 @@ export class LoadSearchController<T, ID, S extends SearchModel> extends LoadCont
     this.numbers = m.numbers;
   }
   search(req: Request, res: Response) {
-    const s = fromRequest<S>(req);
+    const s = fromRequest<S>(req, this.config.fields);
     const l = getParameters(s);
     const s2 = format(s, this.dates, this.numbers);
     this.find(s2, l.limit, l.skipOrRefId, l.fields)
-      .then(result => jsonResult(res, result, this.csv, s.fields, this.config))
+      .then(result => jsonResult(res, result, this.csv, l.fields, this.config))
       .catch(err => handleError(err, res, this.log));
   }
 }
