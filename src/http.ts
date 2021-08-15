@@ -3,10 +3,10 @@ import {Attribute} from './metadata';
 
 export function handleError(err: any, res: Response, log?: (msg: string, ctx?: any) => void) {
   if (log) {
-    log(err as any);
+    log(JSON.stringify(err));
     res.status(500).end('Internal Server Error');
   } else {
-    res.status(500).end(err);
+    res.status(500).end(JSON.stringify(err));
   }
 }
 export function attr(name: string): Attribute {
