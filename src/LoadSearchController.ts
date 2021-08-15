@@ -31,8 +31,10 @@ export class LoadSearchController<T, ID, S extends SearchModel> extends LoadCont
       this.fields = 'fields';
     }
     const m = getMetadataFunc(viewService, dates, numbers, keys);
-    this.dates = m.dates;
-    this.numbers = m.numbers;
+    if (m) {
+      this.dates = m.dates;
+      this.numbers = m.numbers;
+    }
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, this.fields, this.excluding);

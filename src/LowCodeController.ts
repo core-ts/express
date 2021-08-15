@@ -31,8 +31,10 @@ export class LowCodeController<T, ID, S extends SearchModel> extends GenericCont
       this.fields = 'fields';
     }
     const m = getMetadataFunc(lowCodeService, dates, numbers);
-    this.dates = m.dates;
-    this.numbers = m.numbers;
+    if (m) {
+      this.dates = m.dates;
+      this.numbers = m.numbers;
+    }
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, this.fields, this.excluding);

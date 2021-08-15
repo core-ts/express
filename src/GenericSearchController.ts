@@ -28,8 +28,10 @@ export class GenericSearchController<T, ID, S extends SearchModel> extends Gener
       this.fields = 'fields';
     }
     const m = getMetadataFunc(service, dates, numbers);
-    this.dates = m.dates;
-    this.numbers = m.numbers;
+    if (m) {
+      this.dates = m.dates;
+      this.numbers = m.numbers;
+    }
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, this.fields, this.excluding);
