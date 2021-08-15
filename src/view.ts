@@ -18,8 +18,11 @@ export function buildId<T>(req: Request, attrs?: Attribute[]): T {
     return null;
   }
   if (attrs && attrs.length === 1) {
-    const key = (attrs[0].name ? attrs[0].name : 'id');
-    const id = req.params[key];
+    let id = req.params['id'];
+    const n = attrs[0].name;
+    if ((!id || id.length === 0) && n && n.length > 0) {
+      id = req.params[n];
+    }
     if (id && id.length > 0) {
       if (attrs[0].type === 'integer' || attrs[0].type === 'number') {
         if (isNaN(id as any)) {
