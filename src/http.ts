@@ -45,7 +45,10 @@ export function queryRequiredParams(req: Request, res: Response, name: string, s
 }
 export function queryParams(req: Request, name: string, d?: string[], split?: string): string[] {
   const q = req.query[name];
-  const v = q && q.toString();
+  if (!q) {
+    return d;
+  }
+  const v = q.toString();
   if (!v || v.length === 0) {
     return d;
   }
@@ -55,12 +58,19 @@ export function queryParams(req: Request, name: string, d?: string[], split?: st
   return v.split(split);
 }
 export function queryParam(req: Request, res: Response, name: string): string {
-  const v = req.query[name].toString();
-  if (!v || v.length === 0) {
+  const v = req.query[name]
+  if (!v) {
     res.status(400).end(`'${name}' cannot be empty`);
     return undefined;
+  } else {
+    const v1 = v.toString();
+    if (v1.length === 0) {
+      res.status(400).end(`'${name}' cannot be empty`);
+      return undefined;
+    } else {
+      return v1;
+    }
   }
-  return v;
 }
 export function query(req: Request, name: string, d?: string): string {
   const p = req.query[name];

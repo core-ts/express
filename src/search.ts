@@ -1,15 +1,11 @@
 import {Request, Response} from 'express';
 import {Attribute, Attributes} from './metadata';
 
-export interface ArrayMap {
-  [key: string]: string[]|number[];
-}
 export interface SearchModel {
   fields?: string[];
   sort?: string;
 
-  keyword?: string;
-  excluding?: ArrayMap;
+  q?: string;
 }
 export interface SearchConfig {
   excluding?: string;
