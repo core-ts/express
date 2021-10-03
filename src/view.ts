@@ -10,7 +10,7 @@ export function buildAndCheckId<ID>(req: Request, res: Response, keys?: Attribut
   return id;
 }
 export function buildId<T>(req: Request, attrs?: Attribute[]): T {
-  if (!attrs) {
+  if (!attrs || attrs.length === 0) {
     const id = req.params['id'];
     if (id && id.length > 0) {
       return id as any;
