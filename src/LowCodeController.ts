@@ -3,15 +3,15 @@ import {ResultInfo, StatusConfig} from './edit';
 import {GenericController, GenericService} from './GenericController';
 import {handleError} from './http';
 import {ErrorMessage} from './metadata';
-import {format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchModel, SearchResult} from './search';
+import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
 export interface LowCodeConfig extends StatusConfig, SearchConfig {
 }
-export interface LowCodeService<T, ID, R, S extends SearchModel> extends GenericService<T, ID, R> {
+export interface LowCodeService<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
   search: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>;
 }
-export class LowCodeController<T, ID, S extends SearchModel> extends GenericController<T, ID> {
+export class LowCodeController<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
   dates?: string[];

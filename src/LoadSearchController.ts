@@ -2,10 +2,10 @@ import {Request, Response} from 'express';
 import {handleError} from './http';
 import {LoadController, ViewService} from './LoadController';
 import {Attribute, Attributes} from './metadata';
-import {format, fromRequest, getParameters, initializeConfig, jsonResult, Metadata, SearchConfig, SearchModel, SearchResult} from './search';
+import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
-export class LoadSearchController<T, ID, S extends SearchModel> extends LoadController<T, ID> {
+export class LoadSearchController<T, ID, S extends Filter> extends LoadController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
   dates?: string[];

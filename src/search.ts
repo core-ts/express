@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {Attribute, Attributes} from './metadata';
 
-export interface SearchModel {
+export interface Filter {
   fields?: string[];
   sort?: string;
 

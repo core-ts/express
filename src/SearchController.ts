@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
 import {handleError} from './http';
-import {format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchModel, SearchResult} from './search';
+import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 
-export class SearchController<T, S extends SearchModel> {
+export class SearchController<T, S extends Filter> {
   config?: SearchConfig;
   csv?: boolean;
   fields?: string;

@@ -3,12 +3,12 @@ import {ResultInfo, StatusConfig} from './edit';
 import {GenericController, GenericService} from './GenericController';
 import {handleError} from './http';
 import {ErrorMessage} from './metadata';
-import {format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchModel, SearchResult} from './search';
+import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
 export interface Config extends StatusConfig, SearchConfig {
 }
-export class GenericSearchController<T, ID, S extends SearchModel> extends GenericController<T, ID> {
+export class GenericSearchController<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
   dates?: string[];
