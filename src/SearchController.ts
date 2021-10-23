@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import {handleError} from './http';
-import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
+import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 
 export class SearchController<T, S extends Filter> {
   config?: SearchConfig;

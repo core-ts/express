@@ -40,17 +40,21 @@ export function buildResult<T>(r: SearchResult<T>, conf?: SearchConfig): any {
     return r;
   }
   const x: any = {};
-  x[conf.list] = r.list;
-  x[conf.total] = r.total;
+  const li = (conf.list ? conf.list : 'list');
+  x[li] = r.list;
+  const to = (conf.total ? conf.total : 'total');
+  x[to] = r.total;
   if (r.nextPageToken && r.nextPageToken.length > 0) {
-    x[conf.token] = r.nextPageToken;
+    const t = (conf.token ? conf.token : 'token');
+    x[t] = r.nextPageToken;
   }
   if (r.last) {
-    x[conf.last] = r.last;
+    const l = (conf.last ? conf.last : 'last');
+    x[l] = r.last;
   }
   return x;
 }
-export function initializeConfig(conf: SearchConfig): SearchConfig {
+export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined {
   if (!conf) {
     return undefined;
   }
@@ -149,9 +153,9 @@ export function setValue<T>(obj: T, path: string, value: string): void {
 export function setValue<T, V>(obj: T, path: string, value: V): void {
   const paths = path.split('.');
   if (paths.length === 1) {
-    obj[path] = value;
+    (obj as any)[path] = value;
   } else {
-    let o = obj;
+    let o: any = obj;
     const l = paths.length - 1;
     for (let i = 0; i < l - 1; i++) {
       const p = paths[i];
@@ -173,42 +177,43 @@ export interface Limit {
   skipOrRefId?: string|number;
 }
 export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
+  const o: any = obj;
   if (!config) {
     const sfield = 'fields';
     let fields;
-    const fs = obj[sfield];
+    const fs = o[sfield];
     if (fs && Array.isArray(fs)) {
       fields = fs;
-      delete obj[sfield];
+      delete o[sfield];
     }
-    let refId = obj['refId'];
+    let refId = o['refId'];
     if (!refId) {
-      refId = obj['nextPageToken'];
+      refId = o['nextPageToken'];
     }
     const r: Limit = {fields, refId};
-    let pageSize = obj['limit'];
+    let pageSize = o['limit'];
     if (!pageSize) {
-      pageSize = obj['pageSize'];
+      pageSize = o['pageSize'];
     }
     if (pageSize && !isNaN(pageSize)) {
       const ipageSize = Math.floor(parseFloat(pageSize));
       if (ipageSize > 0) {
         r.limit = ipageSize;
-        const skip = obj['skip'];
+        const skip = o['skip'];
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
             r.skip = iskip;
             r.skipOrRefId = r.skip;
-            deletePageInfo(obj);
+            deletePageInfo(o);
             return r;
           }
         }
-        let pageIndex = obj['page'];
+        let pageIndex = o['page'];
         if (!pageIndex) {
-          pageIndex = obj['pageIndex'];
+          pageIndex = o['pageIndex'];
           if (!pageIndex) {
-            pageIndex = obj['pageNo'];
+            pageIndex = o['pageNo'];
           }
         }
         if (pageIndex && !isNaN(pageIndex)) {
@@ -216,39 +221,39 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (ipageIndex < 1) {
             ipageIndex = 1;
           }
-          let firstPageSize = obj['firstLimit'];
+          let firstPageSize = o['firstLimit'];
           if (!firstPageSize) {
-            firstPageSize = obj['firstPageSize'];
+            firstPageSize = o['firstPageSize'];
           }
           if (!firstPageSize) {
-            firstPageSize = obj['initPageSize'];
+            firstPageSize = o['initPageSize'];
           }
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
               r.skip = ipageSize * (ipageIndex - 2) + ifirstPageSize;
               r.skipOrRefId = r.skip;
-              deletePageInfo(obj);
+              deletePageInfo(o);
               return r;
             }
           }
           r.skip = ipageSize * (ipageIndex - 1);
           r.skipOrRefId = r.skip;
-          deletePageInfo(obj);
+          deletePageInfo(o);
           return r;
         }
         r.skip = 0;
         if (r.refId && r.refId.length > 0) {
           r.skipOrRefId = r.refId;
         }
-        deletePageInfo(obj);
+        deletePageInfo(o);
         return r;
       }
     }
     if (r.refId && r.refId.length > 0) {
       r.skipOrRefId = r.refId;
     }
-    deletePageInfo(obj);
+    deletePageInfo(o);
     return r;
   } else {
     let sfield = config.fields;
@@ -256,23 +261,23 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
       sfield = 'fields';
     }
     let fields;
-    const fs = obj[sfield];
+    const fs = o[sfield];
     if (fs && Array.isArray(fs)) {
       fields = fs;
-      delete obj[sfield];
+      delete o[sfield];
     }
     let strRefId = config.refId;
     if (!strRefId || strRefId.length === 0) {
       strRefId = 'refId';
     }
-    const refId = obj[strRefId];
+    const refId = o[strRefId];
     const r: Limit = {fields, refId};
 
     let strLimit = config.limit;
     if (!strLimit || strLimit.length === 0) {
       strLimit = 'limit';
     }
-    const pageSize = obj[strLimit];
+    const pageSize = o[strLimit];
     const arr = [config.page, config.limit, config.skip, config.refId, config.firstLimit];
     if (pageSize && !isNaN(pageSize)) {
       const ipageSize = Math.floor(parseFloat(pageSize));
@@ -282,13 +287,13 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
         if (!strSkip || strSkip.length === 0) {
           strSkip = 'skip';
         }
-        const skip = obj[strSkip];
+        const skip = o[strSkip];
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
             r.skip = iskip;
             r.skipOrRefId = r.skip;
-            deletePageInfo(obj, arr);
+            deletePageInfo(o, arr);
             return r;
           }
         }
@@ -296,7 +301,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
         if (!strPage || strPage.length === 0) {
           strPage = 'page';
         }
-        const pageIndex = obj[strPage];
+        const pageIndex = o[strPage];
         if (pageIndex && !isNaN(pageIndex)) {
           let ipageIndex = Math.floor(parseFloat(pageIndex));
           if (ipageIndex < 1) {
@@ -306,37 +311,37 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (!strFirstLimit || strFirstLimit.length === 0) {
             strFirstLimit = 'firstLimit';
           }
-          const firstPageSize = obj[strFirstLimit];
+          const firstPageSize = o[strFirstLimit];
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
               r.skip = ipageSize * (ipageIndex - 2) + ifirstPageSize;
               r.skipOrRefId = r.skip;
-              deletePageInfo(obj, arr);
+              deletePageInfo(o, arr);
               return r;
             }
           }
           r.skip = ipageSize * (ipageIndex - 1);
           r.skipOrRefId = r.skip;
-          deletePageInfo(obj, arr);
+          deletePageInfo(o, arr);
           return r;
         }
         r.skip = 0;
         if (r.refId && r.refId.length > 0) {
           r.skipOrRefId = r.refId;
         }
-        deletePageInfo(obj, arr);
+        deletePageInfo(o, arr);
         return r;
       }
     }
     if (r.refId && r.refId.length > 0) {
       r.skipOrRefId = r.refId;
     }
-    deletePageInfo(obj, arr);
+    deletePageInfo(o, arr);
     return r;
   }
 }
-export function deletePageInfo(obj: any, arr?: string[]): void {
+export function deletePageInfo(obj: any, arr?: (string | undefined)[]): void {
   if (!arr || arr.length === 0) {
     delete obj['limit'];
     delete obj['firstLimit'];
@@ -371,7 +376,7 @@ export function toCsv<T>(fields: string[], r: SearchResult<T>): string {
     for (const item of r.list) {
       const cols: string[] = [];
       for (const name of fields) {
-        const v = item[name];
+        const v = (item as any)[name];
         if (!v) {
           cols.push(e);
         } else {
@@ -439,8 +444,8 @@ export function buildMetadata(attributes: Attributes, includeDate?: boolean): Me
 
 const _datereg = '/Date(';
 const _re = /-?\d+/;
-function toDate(v: any) {
-  if (!v || v === '') {
+function toDate(v: any): Date | null | undefined {
+  if (!v) {
     return null;
   }
   if (v instanceof Date) {
@@ -451,33 +456,39 @@ function toDate(v: any) {
   const i = v.indexOf(_datereg);
   if (i >= 0) {
     const m = _re.exec(v);
-    const d = parseInt(m[0], null);
-    return new Date(d);
+    if (m !== null) {
+      const d = parseInt(m[0], 10);
+      return new Date(d);
+    } else {
+      return null;
+    }
   } else {
     if (isNaN(v)) {
       return new Date(v);
     } else {
-      const d = parseInt(v, null);
+      const d = parseInt(v, 10);
       return new Date(d);
     }
   }
 }
 
 export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
+  const o: any = obj;
   if (dates && dates.length > 0) {
     for (const s of dates) {
-      const v = obj[s];
+      const v = o[s];
       if (v) {
         if (v instanceof Date) {
           continue;
         }
         if (typeof v === 'string' || typeof v === 'number') {
           const d = toDate(v);
-          const error = d.toString();
-          if (!(d instanceof Date) || error === 'Invalid Date') {
-            delete obj[s];
-          } else {
-            obj[s] = d;
+          if (d) {
+            if (!(d instanceof Date) || d.toString() === 'Invalid Date') {
+              delete o[s];
+            } else {
+              o[s] = d;
+            }
           }
         } else if (typeof v === 'object') {
           const keys = Object.keys(v);
@@ -488,11 +499,12 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
             }
             if (typeof v2 === 'string' || typeof v2 === 'number') {
               const d2 = toDate(v2);
-              const error2 = d2.toString();
-              if (!(d2 instanceof Date) || error2 === 'Invalid Date') {
-                delete v[key];
-              } else {
-                v[key] = d2;
+              if (d2) {
+                if (!(d2 instanceof Date) || d2.toString() === 'Invalid Date') {
+                  delete v[key];
+                } else {
+                  v[key] = d2;
+                }
               }
             }
           }
@@ -502,10 +514,10 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
   }
   if (nums && nums.length > 0) {
     for (const s of nums) {
-      const v = obj[s];
+      const v = o[s];
       if (v) {
         if (v instanceof Date) {
-          delete obj[s];
+          delete o[s];
           continue;
         }
         if (typeof v === 'number') {
@@ -513,18 +525,18 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
         }
         if (typeof v === 'string') {
           if (!isNaN(v as any)) {
-            delete obj[s];
+            delete o[s];
             continue;
           } else {
             const i = parseFloat(v);
-            obj[s] = i;
+            o[s] = i;
           }
         } else if (typeof v === 'object') {
           const keys = Object.keys(v);
           for (const key of keys) {
             const v2 = v[key];
             if (v2 instanceof Date) {
-              delete obj[key];
+              delete o[key];
               continue;
             }
             if (typeof v2 === 'number') {
@@ -543,5 +555,5 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
       }
     }
   }
-  return obj;
+  return o;
 }

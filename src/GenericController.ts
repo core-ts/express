@@ -16,7 +16,7 @@ export interface GenericService<T, ID, R> {
 }
 export class GenericController<T, ID> extends LoadController<T, ID> {
   status: StatusConfig;
-  metadata: Attributes;
+  metadata?: Attributes;
   constructor(log: (msg: string, ctx?: any) => void, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>) {
     super(log, service);
     this.status = initializeStatus(status);
@@ -43,23 +43,27 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     validateAndCreate(req, res, this.status, this.service.insert, this.log, this.validate);
   }
   update(req: Request, res: Response) {
-    const id = buildAndCheckIdWithBody<T, ID>(req, res, this.keys);
+    const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update);
     if (id) {
       validateAndUpdate(res, this.status, req.body, false, this.service.update, this.log, this.validate);
     }
   }
   patch(req: Request, res: Response) {
-    const id = buildAndCheckIdWithBody<T, ID>(req, res, this.keys);
-    if (id) {
+    const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.patch);
+    if (id && this.service.patch) {
       validateAndUpdate(res, this.status, req.body, true, this.service.patch, this.log, this.validate);
     }
   }
   delete(req: Request, res: Response) {
     const id = buildAndCheckId<ID>(req, res, this.keys);
     if (id) {
-      this.service.delete(id).then(count => {
-        res.status(getDeleteStatus(count)).json(count).end();
-      }).catch(err => handleError(err, res, this.log));
+      if (!this.service.delete) {
+        res.status(405).end('Method Not Allowed');
+      } else {
+        this.service.delete(id).then(count => {
+          res.status(getDeleteStatus(count)).json(count).end();
+        }).catch(err => handleError(err, res, this.log));
+      }
     }
   }
 }
@@ -95,10 +99,14 @@ export function validateAndUpdate<T>(res: Response, status: StatusConfig, obj: T
     update(res, status, obj, save, log);
   }
 }
-export function buildAndCheckIdWithBody<T, ID>(req: Request, res: Response, keys?: Attribute[]): ID {
+export function buildAndCheckIdWithBody<T, ID, R>(req: Request, res: Response, keys?: Attribute[], patch?: (obj: T, ctx?: any) => Promise<R>): ID | undefined {
   const obj = req.body;
   if (!obj || obj === '') {
     res.status(400).end('The request body cannot be empty.');
+    return undefined;
+  }
+  if (!patch) {
+    res.status(405).end('Method Not Allowed');
     return undefined;
   }
   const id = buildId<ID>(req, keys);

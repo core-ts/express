@@ -3,11 +3,11 @@ import {handleError} from './http';
 import {Attribute, ErrorMessage} from './metadata';
 
 export interface StatusConfig {
-  duplicate_key?: number|string;
-  not_found?: number|string;
-  success?: number|string;
+  duplicate_key: number|string;
+  not_found: number|string;
+  success: number|string;
   version_error?: number|string;
-  validation_error?: number|string;
+  validation_error: number|string;
   error?: number|string;
 }
 export interface ResultInfo<T> {
@@ -16,7 +16,7 @@ export interface ResultInfo<T> {
   value?: T;
   message?: string;
 }
-export function initializeStatus(s: StatusConfig): StatusConfig {
+export function initializeStatus(s?: StatusConfig): StatusConfig {
   if (s) {
     return s;
   }
@@ -25,39 +25,39 @@ export function initializeStatus(s: StatusConfig): StatusConfig {
     not_found: 0,
     success: 1,
     version_error: 2,
+    validation_error: 4,
     error: 4
   };
   return s1;
 }
-export function checkId<T, ID>(obj: T, id: ID, keys: Attribute[]): boolean {
-  let n = 'id';
-  if (keys && keys.length === 1) {
-    n = keys[0].name;
-  }
+export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
+  const n: string = (keys && keys.length === 1 && keys[0].name ? keys[0].name : 'id');
+  const o: any = obj;
+  const i: any = id;
   if (!keys || keys.length === 1) {
-    const v = obj[n];
+    const v = o[n];
     if (!v) {
-      obj[n] = id;
+      o[n] = i;
       return true;
     }
     // tslint:disable-next-line:triple-equals
-    if (v != id) {
+    if (v != i) {
       return false;
     }
     return true;
   }
-  const ks = Object.keys(id);
+  const ks = Object.keys(i);
   for (const k of ks) {
-    const v = obj[k];
+    const v = o[k];
     if (!v) {
-      obj[k] = id[k];
+      o[k] = i[k];
     } else {
       // tslint:disable-next-line:triple-equals
-      if (v != id[k]) {
+      if (v != i[k]) {
         return false;
       }
     }
-    obj[k] = id[k];
+    o[k] = i[k];
   }
   return true;
 }

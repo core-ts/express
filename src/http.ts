@@ -27,7 +27,7 @@ export function respondModel<T>(obj: T, res: Response): void {
     res.status(404).json(null).end();
   }
 }
-export function queryRequiredParams(req: Request, res: Response, name: string, split?: string): string[] {
+export function queryRequiredParams(req: Request, res: Response, name: string, split?: string): string[]|undefined {
   const v = req.query[name];
   if (!v) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -43,7 +43,7 @@ export function queryRequiredParams(req: Request, res: Response, name: string, s
   }
   return v2.split(split);
 }
-export function queryParams(req: Request, name: string, d?: string[], split?: string): string[] {
+export function queryParams(req: Request, name: string, d?: string[], split?: string): string[]|undefined {
   const q = req.query[name];
   if (!q) {
     return d;
@@ -57,8 +57,8 @@ export function queryParams(req: Request, name: string, d?: string[], split?: st
   }
   return v.split(split);
 }
-export function queryParam(req: Request, res: Response, name: string): string {
-  const v = req.query[name]
+export function queryParam(req: Request, res: Response, name: string): string|undefined {
+  const v = req.query[name];
   if (!v) {
     res.status(400).end(`'${name}' cannot be empty`);
     return undefined;
@@ -72,15 +72,18 @@ export function queryParam(req: Request, res: Response, name: string): string {
     }
   }
 }
-export function query(req: Request, name: string, d?: string): string {
+export function query(req: Request, name: string, d?: string): string|undefined {
   const p = req.query[name];
   if (!p || p.toString().length === 0) {
     return d;
   }
   return p.toString();
 }
-export function queryRequiredNumber(req: Request, res: Response, name: string): number {
+export function queryRequiredNumber(req: Request, res: Response, name: string): number|undefined {
   const field = req.query[name];
+  if (!field) {
+    return undefined;
+  }
   const v = field.toString();
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -93,7 +96,7 @@ export function queryRequiredNumber(req: Request, res: Response, name: string): 
   const n = parseFloat(v);
   return n;
 }
-export function queryNumber(req: Request, name: string, d?: number): number {
+export function queryNumber(req: Request, name: string, d?: number): number|undefined {
   const field = req.query[name];
   const v = field ? field.toString() : undefined;
   if (!v || v.length === 0) {
@@ -105,8 +108,11 @@ export function queryNumber(req: Request, name: string, d?: number): number {
   const n = parseFloat(v);
   return n;
 }
-export function queryRequiredDate(req: Request, res: Response, name: string): Date {
+export function queryRequiredDate(req: Request, res: Response, name: string): Date|undefined {
   const field = req.query[name];
+  if (!field) {
+    return undefined;
+  }
   const v = field.toString();
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -119,7 +125,7 @@ export function queryRequiredDate(req: Request, res: Response, name: string): Da
   }
   return date;
 }
-export function queryDate(req: Request, name: string, d?: Date): Date {
+export function queryDate(req: Request, name: string, d?: Date): Date|undefined {
   const field = req.query[name];
   if (field) {
     const v = field.toString();
@@ -135,7 +141,7 @@ export function queryDate(req: Request, name: string, d?: Date): Date {
   return undefined;
 }
 
-export function param(req: Request, res: Response, name: string): string {
+export function param(req: Request, res: Response, name: string): string|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -143,7 +149,7 @@ export function param(req: Request, res: Response, name: string): string {
   }
   return v;
 }
-export function params(req: Request, name: string, d?: string[], split?: string): string[] {
+export function params(req: Request, name: string, d?: string[], split?: string): string[]|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;
@@ -153,7 +159,7 @@ export function params(req: Request, name: string, d?: string[], split?: string)
   }
   return v.split(split);
 }
-export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[] {
+export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[]|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -164,7 +170,7 @@ export function getRequiredParameters(req: Request, res: Response, name: string,
   }
   return v.split(split);
 }
-export function getRequiredNumber(req: Request, res: Response, name: string): number {
+export function getRequiredNumber(req: Request, res: Response, name: string): number|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -177,7 +183,7 @@ export function getRequiredNumber(req: Request, res: Response, name: string): nu
   const n = parseFloat(v);
   return n;
 }
-export function getNumber(req: Request, name: string, d?: number): number {
+export function getNumber(req: Request, name: string, d?: number): number|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;
@@ -188,7 +194,7 @@ export function getNumber(req: Request, name: string, d?: number): number {
   const n = parseFloat(v);
   return n;
 }
-export function getInteger(req: Request, name: string, d?: number): number {
+export function getInteger(req: Request, name: string, d?: number): number|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;
@@ -200,7 +206,7 @@ export function getInteger(req: Request, name: string, d?: number): number {
   const s = n.toFixed(0);
   return parseFloat(s);
 }
-export function getRequiredDate(req: Request, res: Response, name: string): Date {
+export function getRequiredDate(req: Request, res: Response, name: string): Date|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -213,7 +219,7 @@ export function getRequiredDate(req: Request, res: Response, name: string): Date
   }
   return date;
 }
-export function getDate(req: Request, name: string, d?: Date): Date {
+export function getDate(req: Request, name: string, d?: Date): Date|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;

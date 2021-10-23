@@ -13,7 +13,7 @@ function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: an
   }
   return viewService.load;
 }
-function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[]): Attribute[] {
+function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[]): Attribute[] | undefined {
   if (keys) {
     if (Array.isArray(keys)) {
       if (keys.length > 0) {

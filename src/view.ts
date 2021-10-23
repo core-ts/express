@@ -1,21 +1,21 @@
 import {Request, Response} from 'express';
 import {Attribute, Attributes} from './metadata';
 
-export function buildAndCheckId<ID>(req: Request, res: Response, keys?: Attribute[]) {
+export function buildAndCheckId<ID>(req: Request, res: Response, keys?: Attribute[]): ID | undefined {
   const id = buildId<ID>(req, keys);
   if (!id) {
     res.status(400).end('invalid parameters');
-    return null;
+    return undefined;
   }
   return id;
 }
-export function buildId<T>(req: Request, attrs?: Attribute[]): T {
+export function buildId<T>(req: Request, attrs?: Attribute[]): T | undefined {
   if (!attrs || attrs.length === 0) {
     const id = req.params['id'];
     if (id && id.length > 0) {
       return id as any;
     }
-    return null;
+    return undefined;
   }
   if (attrs && attrs.length === 1) {
     let id = req.params['id'];
@@ -26,7 +26,7 @@ export function buildId<T>(req: Request, attrs?: Attribute[]): T {
     if (id && id.length > 0) {
       if (attrs[0].type === 'integer' || attrs[0].type === 'number') {
         if (isNaN(id as any)) {
-          return null;
+          return undefined;
         }
         const v = parseFloat(id);
         return v as any;
@@ -36,13 +36,16 @@ export function buildId<T>(req: Request, attrs?: Attribute[]): T {
   }
   const ids: any = {};
   for (const attr of attrs) {
+    if (!attr.name) {
+      return undefined;
+    }
     const v = req.params[attr.name];
     if (!v) {
-      return null;
+      return undefined;
     }
     if (attr.type === 'integer' || attr.type === 'number') {
       if (isNaN(v as any)) {
-        return null;
+        return undefined;
       }
       ids[attr.name] = parseFloat(v);
     } else {
@@ -51,7 +54,7 @@ export function buildId<T>(req: Request, attrs?: Attribute[]): T {
     return ids;
   }
 }
-export function buildKeys(attrs: Attributes): Attribute[] {
+export function buildKeys(attrs: Attributes): Attribute[] | undefined {
   if (!attrs) {
     return undefined;
   }

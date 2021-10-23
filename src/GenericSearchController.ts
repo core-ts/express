@@ -3,7 +3,7 @@ import {ResultInfo, StatusConfig} from './edit';
 import {GenericController, GenericService} from './GenericController';
 import {handleError} from './http';
 import {ErrorMessage} from './metadata';
-import {format, Filter, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
+import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
 export interface Config extends StatusConfig, SearchConfig {

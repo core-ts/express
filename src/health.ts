@@ -17,12 +17,10 @@ export interface HealthChecker {
 }
 
 export async function check(checkers: HealthChecker[]): Promise<Health> {
-  const p: Health = {
-    status: 'UP',
-    details: {} as HealthMap,
-  };
+  const p: Health = { status: 'UP' };
   const total = checkers.length - 1;
   let count = 0;
+  p.details = {} as HealthMap;
   for (const checker of checkers) {
     const sub: Health = {status: 'UP'};
     try {
@@ -48,4 +46,5 @@ export async function check(checkers: HealthChecker[]): Promise<Health> {
       }
     }
   }
+  return p;
 }
