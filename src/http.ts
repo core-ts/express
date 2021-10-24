@@ -1,12 +1,19 @@
 import {Request, Response} from 'express';
 import {Attribute} from './metadata';
 
-export function handleError(err: any, res: Response, log?: (msg: string, ctx?: any) => void) {
+export function handleError(err: any, res: Response, log?: (msg: any, ctx?: any) => void) {
   if (log) {
-    log(JSON.stringify(err));
+    log(toString(err));
     res.status(500).end('Internal Server Error');
   } else {
-    res.status(500).end(JSON.stringify(err));
+    res.status(500).end(toString(err));
+  }
+}
+export function toString(v: any): string {
+  if (typeof v === 'string') {
+    return v;
+  } else {
+    return JSON.stringify(v);
   }
 }
 export function attr(name: string): Attribute {

@@ -15,7 +15,7 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: string, ctx?: any) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ResultInfo<T>>, config?: Config, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+  constructor(log: (msg: any, ctx?: any) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ResultInfo<T>>, config?: Config, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
     super(log, service, config, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
