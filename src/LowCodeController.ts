@@ -8,7 +8,7 @@ import {getMetadataFunc} from './search_func';
 
 export interface LowCodeConfig extends StatusConfig, SearchConfig {
 }
-export interface LowCodeService<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
+export interface Service<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
   search: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>;
 }
 export class LowCodeController<T, ID, S extends Filter> extends GenericController<T, ID> {
@@ -18,7 +18,7 @@ export class LowCodeController<T, ID, S extends Filter> extends GenericControlle
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: any, ctx?: any) => void, public lowCodeService: LowCodeService<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+  constructor(log: (msg: any, ctx?: any) => void, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
     super(log, lowCodeService, config, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
