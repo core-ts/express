@@ -12,9 +12,9 @@ export {GenericController as GenericHandler};
 export {SearchController as SearchHandler};
 export {LoadSearchController as LoadSearchHandler};
 export {GenericSearchController as GenericSearchHandler};
-export {GenericSearchController as Handler};
-export {GenericSearchController as Controller};
 export {LowCodeController as LowCodeHandler};
+export {LowCodeController as Handler};
+export {LowCodeController as Controller};
 
 export * from './health';
 export * from './HealthController';

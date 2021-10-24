@@ -5,9 +5,9 @@ import {buildAndCheckId, buildKeys} from './view';
 
 export interface ViewService<T, ID> {
   metadata?(): Attributes;
-  load(id: ID, ctx?: any): Promise<T>;
+  load(id: ID, ctx?: any): Promise<T|null>;
 }
-function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>)): (id: ID, ctx?: any) => Promise<T> {
+function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>)): (id: ID, ctx?: any) => Promise<T|null> {
   if (typeof viewService === 'function') {
     return viewService;
   }
@@ -38,8 +38,8 @@ function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: an
 }
 export class LoadController<T, ID> {
   protected keys?: Attribute[];
-  protected view: (id: ID, ctx?: any) => Promise<T>;
-  constructor(protected log: (msg: any, ctx?: any) => void, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[]) {
+  protected view: (id: ID, ctx?: any) => Promise<T|null>;
+  constructor(protected log: (msg: any, ctx?: any) => void, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>), keys?: Attributes|Attribute[]|string[]) {
     this.load = this.load.bind(this);
     this.view = getViewFunc(viewService);
     this.keys = getKeysFunc(viewService, keys);

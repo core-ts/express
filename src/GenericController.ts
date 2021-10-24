@@ -8,7 +8,7 @@ import {buildAndCheckId, buildId} from './view';
 
 export interface GenericService<T, ID, R> {
   metadata?(): Attributes;
-  load(id: ID, ctx?: any): Promise<T>;
+  load(id: ID, ctx?: any): Promise<T|null>;
   insert(obj: T, ctx?: any): Promise<R>;
   update(obj: T, ctx?: any): Promise<R>;
   patch?(obj: T, ctx?: any): Promise<R>;
