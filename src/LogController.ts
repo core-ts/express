@@ -3,6 +3,25 @@ import {Request, Response} from 'express';
 export interface NumberMap {
   [key: string]: number;
 }
+export interface LogConfig {
+  level?: string;
+  map?: LogMapConfig;
+}
+export interface LogMapConfig {
+  time?: string;
+  level?: string;
+  msg?: string;
+}
+export interface LogMap {
+  time: string;
+  level: string;
+  msg: string;
+}
+export interface Logger {
+  level: number;
+  map: LogMap;
+}
+
 export class LogController {
   map?: NumberMap;
   constructor(public logger: Logger, mp?: NumberMap) {
@@ -48,22 +67,4 @@ export class LogController {
       return res.status(204).end('false');
     }
   }
-}
-export interface LogConfig {
-  level?: string;
-  map?: LogMapConfig;
-}
-export interface LogMapConfig {
-  time?: string;
-  level?: string;
-  msg?: string;
-}
-export interface LogMap {
-  time: string;
-  level: string;
-  msg: string;
-}
-export interface Logger {
-  level: number;
-  map: LogMap;
 }
