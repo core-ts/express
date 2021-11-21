@@ -9,6 +9,9 @@ import {SearchController} from './SearchController';
 
 export {HealthController as HealthHandler};
 export {LoadController as LoadHandler};
+export {LoadController as ViewHandler};
+export {LoadController as ViewController};
+
 export {GenericController as GenericHandler};
 export {SearchController as SearchHandler};
 export {LoadSearchController as LoadSearchHandler};

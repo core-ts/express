@@ -7,7 +7,7 @@ import {resources} from './resources';
 import {buildAndCheckId, buildId} from './view';
 
 export interface GenericService<T, ID, R> {
-  metadata?(): Attributes;
+  metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
   insert(obj: T, ctx?: any): Promise<R>;
   update(obj: T, ctx?: any): Promise<R>;

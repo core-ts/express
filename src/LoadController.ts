@@ -4,7 +4,7 @@ import {Attribute, Attributes} from './metadata';
 import {buildAndCheckId, buildKeys} from './view';
 
 export interface ViewService<T, ID> {
-  metadata?(): Attributes;
+  metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
 }
 function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>)): (id: ID, ctx?: any) => Promise<T|null> {
