@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {Attribute} from './metadata';
 
-export function handleError(err: any, res: Response, log?: (msg: any, ctx?: any) => void) {
+export function handleError(err: any, res: Response, log?: (msg: string) => void) {
   if (log) {
     log(toString(err));
     res.status(500).end('Internal Server Error');

@@ -6,8 +6,10 @@ import {LoadSearchController} from './LoadSearchController';
 import {LowCodeController} from './LowCodeController';
 import {Service} from './LowCodeController';
 import {SearchController} from './SearchController';
+import {LogController} from './LogController';
 
 export {HealthController as HealthHandler};
+export {LogController as LogHandler};
 export {LoadController as LoadHandler};
 export {LoadController as ViewHandler};
 export {LoadController as ViewController};
@@ -23,6 +25,7 @@ export {Service as LowCodeService};
 
 export * from './health';
 export * from './HealthController';
+export * from './LogController';
 export * from './http';
 export * from './metadata';
 export * from './view';

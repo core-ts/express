@@ -39,7 +39,7 @@ function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: an
 export class LoadController<T, ID> {
   protected keys?: Attribute[];
   protected view: (id: ID, ctx?: any) => Promise<T|null>;
-  constructor(protected log: (msg: any, ctx?: any) => void, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>), keys?: Attributes|Attribute[]|string[]) {
+  constructor(protected log: (msg: string) => void, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>), keys?: Attributes|Attribute[]|string[]) {
     this.load = this.load.bind(this);
     this.view = getViewFunc(viewService);
     this.keys = getKeysFunc(viewService, keys);

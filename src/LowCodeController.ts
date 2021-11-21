@@ -18,7 +18,7 @@ export class LowCodeController<T, ID, S extends Filter> extends GenericControlle
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: any, ctx?: any) => void, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+  constructor(log: (msg: string) => void, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
     super(log, lowCodeService, config, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);

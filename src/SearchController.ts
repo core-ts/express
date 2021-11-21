@@ -7,7 +7,7 @@ export class SearchController<T, S extends Filter> {
   csv?: boolean;
   fields?: string;
   excluding?: string;
-  constructor(protected log: (msg: any, ctx?: any) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, config?: SearchConfig|boolean, public dates?: string[], public numbers?: string[]) {
+  constructor(protected log: (msg: string) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, config?: SearchConfig|boolean, public dates?: string[], public numbers?: string[]) {
     this.search = this.search.bind(this);
     if (config) {
       if (typeof config === 'boolean') {
