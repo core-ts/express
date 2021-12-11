@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {handleError} from './http';
+import {handleError, Log} from './http';
 import {LoadController, ViewService} from './LoadController';
 import {Attribute, Attributes} from './metadata';
 import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
@@ -12,7 +12,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: string) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean, dates?: string[], numbers?: string[]) {
+  constructor(log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean, dates?: string[], numbers?: string[]) {
     super(log, viewService, keys);
     this.search = this.search.bind(this);
     if (config) {

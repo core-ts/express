@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import {checkId, create, initializeStatus, isTypeError, ResultInfo, StatusConfig, update} from './edit';
-import {handleError} from './http';
+import {handleError, Log} from './http';
 import {LoadController} from './LoadController';
 import {Attribute, Attributes, ErrorMessage} from './metadata';
 import {resources} from './resources';
@@ -17,7 +17,7 @@ export interface GenericService<T, ID, R> {
 export class GenericController<T, ID> extends LoadController<T, ID> {
   status: StatusConfig;
   metadata?: Attributes;
-  constructor(log: (msg: string) => void, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>) {
+  constructor(log: Log, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>) {
     super(log, service);
     this.status = initializeStatus(status);
     if (service.metadata) {
@@ -67,7 +67,7 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     }
   }
 }
-export function validateAndCreate<T>(req: Request, res: Response, status: StatusConfig, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: (msg: string) => void, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>): void {
+export function validateAndCreate<T>(req: Request, res: Response, status: StatusConfig, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: Log, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>): void {
   const obj = req.body;
   if (!obj || obj === '') {
     return res.status(400).end('The request body cannot be empty.');
@@ -85,7 +85,7 @@ export function validateAndCreate<T>(req: Request, res: Response, status: Status
     create(res, status, obj, save, log);
   }
 }
-export function validateAndUpdate<T>(res: Response, status: StatusConfig, obj: T, isPatch: boolean, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: (msg: string) => void, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>):  void {
+export function validateAndUpdate<T>(res: Response, status: StatusConfig, obj: T, isPatch: boolean, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: Log, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>):  void {
   if (validate) {
     validate(obj, isPatch).then(errors => {
       if (errors && errors.length > 0) {

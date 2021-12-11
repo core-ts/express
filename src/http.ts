@@ -1,6 +1,8 @@
 import {Request, Response} from 'express';
 import {Attribute} from './metadata';
 
+export type Log = (msg: string) => void;
+export type LogFunc = Log;
 export function handleError(err: any, res: Response, log?: (msg: string) => void) {
   if (log) {
     log(toString(err));

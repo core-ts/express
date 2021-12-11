@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {ResultInfo, StatusConfig} from './edit';
 import {GenericController, GenericService} from './GenericController';
-import {handleError} from './http';
+import {handleError, Log} from './http';
 import {ErrorMessage} from './metadata';
 import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
@@ -18,7 +18,7 @@ export class LowCodeController<T, ID, S extends Filter> extends GenericControlle
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: string) => void, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+  constructor(log: Log, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
     super(log, lowCodeService, config, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);

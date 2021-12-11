@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {handleError} from './http';
+import {handleError, Log} from './http';
 import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 
 export class SearchController<T, S extends Filter> {
@@ -7,7 +7,7 @@ export class SearchController<T, S extends Filter> {
   csv?: boolean;
   fields?: string;
   excluding?: string;
-  constructor(protected log: (msg: string) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, config?: SearchConfig|boolean, public dates?: string[], public numbers?: string[]) {
+  constructor(protected log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, config?: SearchConfig|boolean, public dates?: string[], public numbers?: string[]) {
     this.search = this.search.bind(this);
     if (config) {
       if (typeof config === 'boolean') {

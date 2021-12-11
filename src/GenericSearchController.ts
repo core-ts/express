@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {ResultInfo, StatusConfig} from './edit';
 import {GenericController, GenericService} from './GenericController';
-import {handleError} from './http';
+import {handleError, Log} from './http';
 import {ErrorMessage} from './metadata';
 import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
@@ -15,7 +15,7 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
   numbers?: string[];
   fields?: string;
   excluding?: string;
-  constructor(log: (msg: string) => void, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ResultInfo<T>>, config?: Config, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+  constructor(log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ResultInfo<T>>, config?: Config, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
     super(log, service, config, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
