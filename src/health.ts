@@ -16,7 +16,7 @@ export interface HealthChecker {
   check(): Promise<AnyMap>;
 }
 
-export async function check(checkers: HealthChecker[]): Promise<Health> {
+export async function health(checkers: HealthChecker[]): Promise<Health> {
   const p: Health = { status: 'UP' };
   const total = checkers.length - 1;
   let count = 0;

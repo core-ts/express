@@ -1,16 +1,16 @@
 import {Request, Response} from 'express';
-import {check, HealthChecker} from './health';
+import {health, HealthChecker} from './health';
 
 export class HealthController {
   constructor(protected checkers: HealthChecker[]) {
     this.check = this.check.bind(this);
   }
   check(req: Request, res: Response) {
-    check(this.checkers).then(heath => {
-      if (heath.status === 'UP') {
-        return res.status(200).json(heath).end();
+    health(this.checkers).then(r => {
+      if (r.status === 'UP') {
+        return res.status(200).json(r).end();
       } else {
-        return res.status(500).json(heath).end();
+        return res.status(500).json(r).end();
       }
     });
   }

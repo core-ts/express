@@ -99,7 +99,12 @@ export class LogController {
       }
     }
     if (obj.constants !== undefined && typeof obj.constants === 'object') {
-      this.logger.constants = obj.constants;
+      const ks = Object.keys(obj.constants);
+      if (ks.length > 0) {
+        this.logger.constants = obj.constants;
+      } else {
+        this.logger.constants = undefined;
+      }
       changed = true;
     }
     if (obj.name) {
@@ -115,9 +120,9 @@ export class LogController {
       }
     }
     if (changed) {
-      return res.status(200).end('true');
+      return res.status(200).json(true).end();
     } else {
-      return res.status(204).end('false');
+      return res.status(204).json(false).end();
     }
   }
 }
