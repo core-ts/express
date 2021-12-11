@@ -3,7 +3,7 @@ import {Request, Response} from 'express';
 export interface NumberMap {
   [key: string]: number;
 }
-export interface LogConfig {
+export interface LogConf {
   level?: string;
   map?: LogMapConfig;
 }
@@ -17,19 +17,19 @@ export interface LogMap {
   level: string;
   msg: string;
 }
-export interface Logger {
+export interface LoggerConf {
   level: number;
   map: LogMap;
 }
 
 export class LogController {
   map?: NumberMap;
-  constructor(public logger: Logger, mp?: NumberMap) {
+  constructor(public logger: LoggerConf, mp?: NumberMap) {
     this.map = mp;
     this.config = this.config.bind(this);
   }
   config(req: Request, res: Response) {
-    const obj: LogConfig = req.body;
+    const obj: LogConf = req.body;
     if (!obj || obj === '') {
       return res.status(400).end('The request body cannot be empty');
     }

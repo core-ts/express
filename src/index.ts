@@ -26,6 +26,7 @@ export {Service as LowCodeService};
 export * from './health';
 export * from './HealthController';
 export * from './LogController';
+export * from './log';
 export * from './http';
 export * from './metadata';
 export * from './view';
