@@ -3,10 +3,10 @@ import {GenericSearchController} from './GenericSearchController';
 import {HealthController} from './HealthController';
 import {LoadController} from './LoadController';
 import {LoadSearchController} from './LoadSearchController';
+import {LogController} from './LogController';
 import {LowCodeController} from './LowCodeController';
 import {Service} from './LowCodeController';
 import {SearchController} from './SearchController';
-import {LogController} from './LogController';
 
 export {HealthController as HealthHandler};
 export {LogController as LogHandler};
