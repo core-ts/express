@@ -107,29 +107,57 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
   }
   return c;
 }
-export function fromRequest<S>(req: Request, fields?: string, excluding?: string): S {
-  const s: any = (req.method === 'GET' ? fromUrl(req, fields, excluding) : req.body);
+export function fromRequest<S>(req: Request, arr?: string[]): S {
+  const s: any = (req.method === 'GET' ? fromUrl(req, arr) : req.body);
   return s;
 }
-export function fromUrl<S>(req: Request, fields?: string, excluding?: string): S {
+export function buildArray(arr?: string[], s0?: string, s1?: string, s2?: string): string[] {
+  const r: string[] = [];
+  if (arr && arr.length > 0) {
+    for (const a of arr) {
+      r.push(a);
+    }
+  }
+  if (s0 && s0.length > 0) {
+    r.push(s0);
+  }
+  if (s1 && s1.length > 0) {
+    r.push(s1);
+  }
+  if (s2 && s2.length > 0) {
+    r.push(s2);
+  }
+  return r;
+}
+export function fromUrl<S>(req: Request, arr?: string[]): S {
+  /*
   if (!fields || fields.length === 0) {
     fields = 'fields';
   }
+  */
   const s: any = {};
     const obj = req.query;
     const keys = Object.keys(obj);
     for (const key of keys) {
-      if (key === fields) {
+      if (inArray(key, arr)) {
         const x = (obj[key] as string).split(',');
-        s[key] = x;
-      } else if (key === excluding) {
-        const x = (obj[key] as string).split(',');
-        s[key] = x;
+        setValue(s, key, x);
       } else {
         setValue(s, key, obj[key] as string);
       }
     }
     return s;
+}
+export function inArray(s: string, arr?: string[]): boolean {
+  if (!arr || arr.length === 0) {
+    return false;
+  }
+  for (const a of arr) {
+    if (s === a) {
+      return true;
+    }
+  }
+  return false;
 }
 /*
 export function setValue<T>(obj: T, path: string, value: string): void {

@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {handleError, Log} from './http';
 import {LoadController, ViewService} from './LoadController';
 import {Attribute, Attributes} from './metadata';
-import {Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
+import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
 export class LoadSearchController<T, ID, S extends Filter> extends LoadController<T, ID> {
@@ -12,6 +12,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
   numbers?: string[];
   fields?: string;
   excluding?: string;
+  array?: string[];
   constructor(log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean, dates?: string[], numbers?: string[]) {
     super(log, viewService, keys);
     this.search = this.search.bind(this);
@@ -37,7 +38,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
     }
   }
   search(req: Request, res: Response) {
-    const s = fromRequest<S>(req, this.fields, this.excluding);
+    const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding));
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);
     this.find(s2, l.limit, l.skipOrRefId, l.fields)
