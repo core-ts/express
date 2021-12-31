@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import * as fs from 'fs';
 import { Attributes, ErrorMessage } from './metadata';
 
 // tslint:disable-next-line:class-name
@@ -33,4 +34,23 @@ export type Handler = (req: Request, res: Response, next: NextFunction) => void;
 export function check(attributes: Attributes, allowUndefined?: boolean): Handler {
   const x = new TypeChecker(attributes, allowUndefined);
   return x.check;
+}
+export interface Template {
+  name?: string | null;
+  text: string;
+  templates: TemplateNode[];
+}
+export interface TemplateNode {
+  type: string;
+  text: string;
+  property: string | null;
+  encode?: string | null;
+  value: string | null;
+}
+export function loadTemplates(ok: boolean|undefined, buildTemplates: (streams: string[], correct?: (stream: string) => string) => Map<string, Template>, correct?: (stream: string) => string): Map<string, Template>|undefined {
+  if (!ok) {
+    return undefined;
+  }
+  const mapper = fs.readFileSync('./src/query.xml', 'utf8');
+  return buildTemplates([mapper], correct);
 }
