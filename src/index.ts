@@ -1,3 +1,4 @@
+import {NextFunction, Request, Response} from 'express';
 import {GenericController} from './GenericController';
 import {GenericSearchController} from './GenericSearchController';
 import {HealthController} from './HealthController';
@@ -40,3 +41,20 @@ export * from './edit';
 export * from './GenericController';
 export * from './GenericSearchController';
 export * from './LowCodeController';
+
+export interface AccessConfig {
+  origin: string;
+  credentials: string;
+  methods: string;
+  headers: string;
+}
+export type AccessControlAllowConfig = AccessConfig;
+export function allow(access: AccessConfig): (req: Request, res: Response, next: NextFunction) => void {
+  return (req: Request, res: Response, next: NextFunction) => {
+    res.header('Access-Control-Allow-Origin', access.origin);
+    res.header('Access-Control-Allow-Credentials', access.credentials);
+    res.header('Access-Control-Allow-Methods', access.methods);
+    res.setHeader('Access-Control-Allow-Headers', access.headers);
+    next();
+  };
+}

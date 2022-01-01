@@ -3,7 +3,7 @@ import { ParamsDictionary, Request, Response } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { PassThrough } from 'stream';
 
-export interface LogConfig {
+export interface LogConf {
   log?: boolean;
   separate?: boolean;
   skips?: string;
@@ -26,7 +26,7 @@ export interface MiddleLog {
 export interface SimpleMap {
   [key: string]: string|number|boolean|Date;
 }
-export function createConfig(c?: LogConfig): MiddleLog {
+export function createConfig(c?: LogConf): MiddleLog {
   if (!c) {
     return {skips: [], duration: 'duration', request: '', response: '', status: '', size: ''};
   }
@@ -61,16 +61,17 @@ export function removeUrlParams(url: string): string {
 export interface Middleware {
   conf: MiddleLog;
 }
+const o = 'OPTIONS';
 export class MiddlewareLogger {
-  constructor(public write: (msg: string, m?: SimpleMap) => void, conf?: LogConfig, public build?: (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, m: SimpleMap) => SimpleMap) {
+  constructor(public write: (msg: string, m?: SimpleMap) => void, conf?: LogConf, public build?: (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, m: SimpleMap) => SimpleMap) {
     this.log = this.log.bind(this);
     this.conf = createConfig(conf);
   }
   conf: MiddleLog;
   log(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) {
-    if (this.conf.log && !skip(this.conf.skips, req.originalUrl)) {
+    const m = req.method;
+    if (m !== o && this.conf.log && !skip(this.conf.skips, req.originalUrl)) {
       const start = process.hrtime();
-      const m = req.method;
       const x = this.conf.request;
       let r = false;
       if (m !== 'GET' && m !== 'DELETE') {

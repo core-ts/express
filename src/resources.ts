@@ -47,10 +47,17 @@ export interface TemplateNode {
   encode?: string | null;
   value: string | null;
 }
-export function loadTemplates(ok: boolean|undefined, buildTemplates: (streams: string[], correct?: (stream: string) => string) => Map<string, Template>, correct?: (stream: string) => string): Map<string, Template>|undefined {
+export function loadTemplates(ok: boolean|undefined, buildTemplates: (streams: string[], correct?: (stream: string) => string) => Map<string, Template>, correct?: (stream: string) => string, files?: string[]): Map<string, Template>|undefined {
   if (!ok) {
     return undefined;
   }
-  const mapper = fs.readFileSync('./src/query.xml', 'utf8');
-  return buildTemplates([mapper], correct);
+  if (!files) {
+    files = ['./src/query.xml'];
+  }
+  const mappers: string[] = [];
+  for (const file of files) {
+    const mapper = fs.readFileSync(file, 'utf8');
+    mappers.push(mapper);
+  }
+  return buildTemplates(mappers, correct);
 }
