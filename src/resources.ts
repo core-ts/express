@@ -6,12 +6,14 @@ import { Attributes, ErrorMessage } from './metadata';
 export class resources {
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>;
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[];
+  static encoding?: BufferEncoding = 'utf-8';
 }
 
 export interface Validator<T> {
   validate(obj: T, patch?: boolean): Promise<ErrorMessage[]>;
 }
 
+// tslint:disable-next-line:max-classes-per-file
 export class TypeChecker {
   constructor(public attributes: Attributes, public allowUndefined?: boolean) {
     this.check = this.check.bind(this);

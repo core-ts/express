@@ -2,6 +2,7 @@ import { NextFunction } from 'express';
 import { ParamsDictionary, Request, Response } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { PassThrough } from 'stream';
+import { resources } from './resources';
 
 export interface LogConf {
   log?: boolean;
@@ -99,7 +100,7 @@ export class MiddlewareLogger {
             op[x] = JSON.stringify(req.body);
           }
           if (this.conf.response.length > 0) {
-            const rsBody = Buffer.concat(chunks).toString();
+            const rsBody = Buffer.concat(chunks).toString(resources.encoding);
             op[this.conf.response] = rsBody;
           }
           if (this.conf.status.length > 0) {
@@ -153,6 +154,7 @@ const getDurationInMilliseconds = (start: [number, number] | undefined) => {
   return (diff[0] * NS_PER_SEC + diff[1]) / NS_TO_MS;
 };
 
+// tslint:disable-next-line:max-classes-per-file
 export class MiddlewareController {
   constructor(public logger: Middleware) {
     this.config = this.config.bind(this);
@@ -215,3 +217,35 @@ export function isValidSkips(s: string[]): boolean {
   }
   return true;
 }
+export function mask(s: string, start: number, end: number, replace: string): string {
+  if (start < 0) {
+    start = 0;
+  }
+  if (end < 0) {
+    end = 0;
+  }
+  const t = start + end;
+  if (t >= s.length) {
+    return replace.repeat(s.length);
+  }
+  return s.substr(0, start) + replace.repeat(s.length - t) + s.substr(s.length - end);
+}
+export function margin(s: string, start: number, end: number, replace: string): string {
+  if (start >= end) {
+    return '';
+  }
+  if (start < 0) {
+    start = 0;
+  }
+  if (end < 0) {
+    end = 0;
+  }
+  if (start >= s.length) {
+    return replace.repeat(s.length);
+  }
+  if (end >= s.length) {
+    return replace.repeat(start) + s.substr(start);
+  }
+  return replace.repeat(start) + s.substr(start, end - start) + replace.repeat(s.length - end);
+}
+export const maskMargin = margin;

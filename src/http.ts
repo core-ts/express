@@ -239,3 +239,35 @@ export function getDate(req: Request, name: string, d?: Date): Date|undefined {
   }
   return date;
 }
+const o = 'object';
+export function minimize(obj: any): any {
+  if (!obj || typeof obj !== o) {
+    return obj;
+  }
+  const keys = Object.keys(obj);
+  for (const key of keys) {
+    const v = obj[key];
+    if (v == null) {
+      delete obj[key];
+    } else if (Array.isArray(v) && v.length > 0) {
+      const v1 = v[0];
+      if (typeof v1 === o && !(v1 instanceof Date)) {
+        for (const item of v) {
+          minimize(item);
+        }
+      }
+    }
+  }
+  return obj;
+}
+export function minimizeArray<T>(arrs: T[]): T[] {
+  if (!arrs) {
+    return arrs;
+  }
+  if (arrs.length > 0) {
+    for (const obj of arrs) {
+      minimize(obj);
+    }
+  }
+  return arrs;
+}

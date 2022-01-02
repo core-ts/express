@@ -1,4 +1,5 @@
 import {Request, Response} from 'express';
+import {minimizeArray} from './http';
 import {Attribute, Attributes} from './metadata';
 
 export interface Filter {
@@ -41,7 +42,7 @@ export function buildResult<T>(r: SearchResult<T>, conf?: SearchConfig): any {
   }
   const x: any = {};
   const li = (conf.list ? conf.list : 'list');
-  x[li] = r.list;
+  x[li] = minimizeArray(r.list);
   const to = (conf.total ? conf.total : 'total');
   x[to] = r.total;
   if (r.nextPageToken && r.nextPageToken.length > 0) {

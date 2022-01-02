@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {attrs, handleError, Log, respondModel} from './http';
+import {attrs, handleError, Log, minimize, respondModel} from './http';
 import {Attribute, Attributes} from './metadata';
 import {buildAndCheckId, buildKeys} from './view';
 
@@ -48,7 +48,7 @@ export class LoadController<T, ID> {
     const id = buildAndCheckId<ID>(req, res, this.keys);
     if (id) {
       this.view(id)
-        .then(obj => respondModel(obj, res))
+        .then(obj => respondModel(minimize(obj), res))
         .catch(err => handleError(err, res, this.log));
     }
   }
