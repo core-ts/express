@@ -11,6 +11,7 @@ export function handleError(err: any, res: Response, log?: (msg: string) => void
     res.status(500).end(toString(err));
   }
 }
+export const error = handleError;
 export function toString(v: any): string {
   if (typeof v === 'string') {
     return v;
@@ -158,6 +159,7 @@ export function param(req: Request, res: Response, name: string): string|undefin
   }
   return v;
 }
+export const getParam = param;
 export function params(req: Request, name: string, d?: string[], split?: string): string[]|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
@@ -168,6 +170,7 @@ export function params(req: Request, name: string, d?: string[], split?: string)
   }
   return v.split(split);
 }
+export const getParams = params;
 export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[]|undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
