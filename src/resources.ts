@@ -21,7 +21,7 @@ export class TypeChecker {
   check(req: Request, res: Response, next: NextFunction): void {
     const obj = req.body;
     if (!obj || (obj as any) === '') {
-      return res.status(400).end('The request body cannot be empty');
+      res.status(400).end('The request body cannot be empty');
     } else {
       const errors = resources.check(obj, this.attributes, this.allowUndefined);
       if (errors.length > 0) {
@@ -37,6 +37,14 @@ export function check(attributes: Attributes, allowUndefined?: boolean): Handler
   const x = new TypeChecker(attributes, allowUndefined);
   return x.check;
 }
+export interface Parameter {
+  name: string;
+  type: string;
+}
+export interface StringFormat {
+  texts: string[];
+  parameters: Parameter[];
+}
 export interface Template {
   name?: string | null;
   text: string;
@@ -48,6 +56,11 @@ export interface TemplateNode {
   property: string | null;
   encode?: string | null;
   value: string | null;
+  format: StringFormat;
+  array?: string | null;
+  separator?: string | null;
+  suffix?: string | null;
+  prefix?: string | null;
 }
 export function loadTemplates(ok: boolean|undefined, buildTemplates: (streams: string[], correct?: (stream: string) => string) => Map<string, Template>, correct?: (stream: string) => string, files?: string[]): Map<string, Template>|undefined {
   if (!ok) {
