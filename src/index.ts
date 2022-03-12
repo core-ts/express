@@ -5,7 +5,7 @@ import {HealthController} from './HealthController';
 import {LoadController} from './LoadController';
 import {LoadSearchController} from './LoadSearchController';
 import {LogController} from './LogController';
-import {LowCodeController} from './LowCodeController';
+import {Controller} from './LowCodeController';
 import {Service} from './LowCodeController';
 import {SearchController} from './SearchController';
 
@@ -19,9 +19,9 @@ export {GenericController as GenericHandler};
 export {SearchController as SearchHandler};
 export {LoadSearchController as LoadSearchHandler};
 export {GenericSearchController as GenericSearchHandler};
-export {LowCodeController as LowCodeHandler};
-export {LowCodeController as Handler};
-export {LowCodeController as Controller};
+export {Controller as LowCodeHandler};
+// export {Controller as Handler};
+export {Controller as LowCodeController};
 export {Service as LowCodeService};
 
 export * from './health';

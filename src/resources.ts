@@ -1,5 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
+import { Application, NextFunction, Request, Response } from 'express';
 import * as fs from 'fs';
+import * as http from 'http';
+import * as https from 'https';
 import { Attributes, ErrorMessage } from './metadata';
 
 // tslint:disable-next-line:class-name
@@ -75,4 +77,39 @@ export function loadTemplates(ok: boolean|undefined, buildTemplates: (streams: s
     mappers.push(mapper);
   }
   return buildTemplates(mappers, correct);
+}
+export interface Server {
+  port: number;
+  https?: boolean;
+  options?: any;
+  key?: string;
+  cert?: string;
+}
+export function start(a: Application, s: Server): void {
+  process.on('uncaughtException', (err) => {
+    console.log(err);
+  });
+  if (s.https) {
+    if (s.options) {
+      https.createServer(s.options, a).listen(s.port, () => {
+        console.log('Use https and start server at port ' + s.port);
+      });
+    } else if (s.key && s.cert && s.key.length > 0 && s.cert.length > 0) {
+      const options = {
+        key: fs.readFileSync(s.key),
+        cert: fs.readFileSync(s.cert)
+      };
+      https.createServer(options, a).listen(s.port, () => {
+        console.log('Use https and start server at port ' + s.port);
+      });
+    } else {
+      http.createServer(a).listen(s.port, () => {
+        console.log('Start server at port ' + s.port);
+      });
+    }
+  } else {
+    http.createServer(a).listen(s.port, () => {
+      console.log('Start server at port ' + s.port);
+    });
+  }
 }

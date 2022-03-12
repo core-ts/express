@@ -11,7 +11,7 @@ export interface LowCodeConfig extends StatusConfig, SearchConfig {
 export interface Service<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
   search: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>;
 }
-export class LowCodeController<T, ID, S extends Filter> extends GenericController<T, ID> {
+export class Controller<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
   dates?: string[];
