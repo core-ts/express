@@ -137,17 +137,17 @@ export function fromUrl<S>(req: Request, arr?: string[]): S {
   }
   */
   const s: any = {};
-    const obj = req.query;
-    const keys = Object.keys(obj);
-    for (const key of keys) {
-      if (inArray(key, arr)) {
-        const x = (obj[key] as string).split(',');
-        setValue(s, key, x);
-      } else {
-        setValue(s, key, obj[key] as string);
-      }
+  const obj = req.query;
+  const keys = Object.keys(obj);
+  for (const key of keys) {
+    if (inArray(key, arr)) {
+      const x = (obj[key] as string).split(',');
+      setValue(s, key, x);
+    } else {
+      setValue(s, key, obj[key] as string);
     }
-    return s;
+  }
+  return s;
 }
 export function inArray(s: string, arr?: string[]): boolean {
   if (!arr || arr.length === 0) {
@@ -179,25 +179,37 @@ export function setValue<T>(obj: T, path: string, value: string): void {
   }
 }
 */
-export function setValue<T, V>(obj: T, path: string, value: V): void {
-  const paths = path.split('.');
-  if (paths.length === 1) {
-    (obj as any)[path] = value;
-  } else {
-    let o: any = obj;
-    const l = paths.length - 1;
-    for (let i = 0; i < l - 1; i++) {
-      const p = paths[i];
-      if (p in o) {
-        o = o[p];
-      } else {
-        o[p] = {};
-        o = o[p];
-      }
-    }
-    o[paths[paths.length - 1]] = value;
+export function setValue<T, V>(o: T, key: string, value: V): any {
+  const obj: any = o;
+  let replaceKey = key.replace(/\[/g, '.[').replace(/\.\./g, '.');
+  if (replaceKey.indexOf('.') === 0) {
+    replaceKey = replaceKey.slice(1, replaceKey.length);
   }
+  const keys = replaceKey.split('.');
+  const firstKey = keys.shift();
+  if (!firstKey) {
+    return;
+  }
+  const isArrayKey = /\[([0-9]+)\]/.test(firstKey);
+  if (keys.length > 0) {
+    const firstKeyValue = obj[firstKey] || {};
+    const returnValue = setValue(firstKeyValue, keys.join('.'), value);
+    return setKey(obj, isArrayKey, firstKey, returnValue);
+  }
+  return setKey(obj, isArrayKey, firstKey, value);
 }
+const setKey = (_object: any, _isArrayKey: boolean, _key: string, _nextValue: any) => {
+  if (_isArrayKey) {
+    if (_object.length > _key) {
+      _object[_key] = _nextValue;
+    } else {
+      _object.push(_nextValue);
+    }
+  } else {
+    _object[_key] = _nextValue;
+  }
+  return _object;
+};
 export interface Limit {
   limit?: number;
   skip?: number;
@@ -370,7 +382,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
     return r;
   }
 }
-export function deletePageInfo(obj: any, arr?: (string | undefined)[]): void {
+export function deletePageInfo(obj: any, arr?: Array<string | undefined>): void {
   if (!arr || arr.length === 0) {
     delete obj['limit'];
     delete obj['firstLimit'];
