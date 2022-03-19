@@ -9,8 +9,10 @@ export interface SearchManager {
   search(req: Request, res: Response): void;
   load(req: Request, res: Response): void;
 }
-export function useSearchController<T, ID, S extends Filter>(log: Log, find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean, dates?: string[], numbers?: string[]): SearchManager {
-  return new LoadSearchController(log, find, viewService, keys, config, dates, numbers);
+export function useSearchController<T, ID, S extends Filter>(log: Log, find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), array?: string[], dates?: string[], numbers?: string[], keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean): SearchManager {
+  const c = new LoadSearchController(log, find, viewService, keys, config, dates, numbers);
+  c.array = array;
+  return c;
 }
 export const useSearchHandler = useSearchController;
 export const createSearchController = useSearchController;
