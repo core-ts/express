@@ -382,6 +382,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
     return r;
   }
 }
+// tslint:disable-next-line:array-type
 export function deletePageInfo(obj: any, arr?: Array<string | undefined>): void {
   if (!arr || arr.length === 0) {
     delete obj['limit'];

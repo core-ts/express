@@ -5,11 +5,11 @@ import {Attribute, Attributes} from './metadata';
 import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
-export interface SearchManager {
+export interface Search {
   search(req: Request, res: Response): void;
   load(req: Request, res: Response): void;
 }
-export function useSearchController<T, ID, S extends Filter>(log: Log, find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), array?: string[], dates?: string[], numbers?: string[], keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean): SearchManager {
+export function useSearchController<T, ID, S extends Filter>(log: Log, find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), array?: string[], dates?: string[], numbers?: string[], keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean): Search {
   const c = new LoadSearchController(log, find, viewService, keys, config, dates, numbers);
   c.array = array;
   return c;
