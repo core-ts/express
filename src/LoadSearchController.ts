@@ -5,6 +5,16 @@ import {Attribute, Attributes} from './metadata';
 import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
+export interface SearchManager {
+  search(req: Request, res: Response): void;
+  load(req: Request, res: Response): void;
+}
+export function useSearchController<T, ID, S extends Filter>(log: Log, find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[], config?: SearchConfig|boolean, dates?: string[], numbers?: string[]): SearchManager {
+  return new LoadSearchController(log, find, viewService, keys, config, dates, numbers);
+}
+export const useSearchHandler = useSearchController;
+export const createSearchController = useSearchController;
+export const createSearchHandler = useSearchController;
 export class LoadSearchController<T, ID, S extends Filter> extends LoadController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
@@ -37,7 +47,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
       this.numbers = m.numbers;
     }
   }
-  search(req: Request, res: Response) {
+  search(req: Request, res: Response): void {
     const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding));
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);

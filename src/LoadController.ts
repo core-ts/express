@@ -44,7 +44,7 @@ export class LoadController<T, ID> {
     this.view = getViewFunc(viewService);
     this.keys = getKeysFunc(viewService, keys);
   }
-  load(req: Request, res: Response) {
+  load(req: Request, res: Response): void {
     const id = buildAndCheckId<ID>(req, res, this.keys);
     if (id) {
       this.view(id)

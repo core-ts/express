@@ -36,25 +36,25 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
       this.validate = v.validate;
     }
   }
-  create(req: Request, res: Response) {
+  create(req: Request, res: Response): void {
     return this.insert(req, res);
   }
-  insert(req: Request, res: Response) {
+  insert(req: Request, res: Response): void {
     validateAndCreate(req, res, this.status, this.service.insert, this.log, this.validate);
   }
-  update(req: Request, res: Response) {
+  update(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update);
     if (id) {
       validateAndUpdate(res, this.status, req.body, false, this.service.update, this.log, this.validate);
     }
   }
-  patch(req: Request, res: Response) {
+  patch(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.patch);
     if (id && this.service.patch) {
       validateAndUpdate(res, this.status, req.body, true, this.service.patch, this.log, this.validate);
     }
   }
-  delete(req: Request, res: Response) {
+  delete(req: Request, res: Response): void {
     const id = buildAndCheckId<ID>(req, res, this.keys);
     if (id) {
       if (!this.service.delete) {
@@ -70,19 +70,20 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
 export function validateAndCreate<T>(req: Request, res: Response, status: StatusConfig, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: Log, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>): void {
   const obj = req.body;
   if (!obj || obj === '') {
-    return res.status(400).end('The request body cannot be empty.');
-  }
-  if (validate) {
-    validate(obj).then(errors => {
-      if (errors && errors.length > 0) {
-        const r: ResultInfo<T> = {status: status.validation_error, errors};
-        res.status(getStatusCode(errors)).json(r).end();
-      } else {
-        create(res, status, obj, save, log);
-      }
-    }).catch(err => handleError(err, res, log));
+    res.status(400).end('The request body cannot be empty.');
   } else {
-    create(res, status, obj, save, log);
+    if (validate) {
+      validate(obj).then(errors => {
+        if (errors && errors.length > 0) {
+          const r: ResultInfo<T> = {status: status.validation_error, errors};
+          res.status(getStatusCode(errors)).json(r).end();
+        } else {
+          create(res, status, obj, save, log);
+        }
+      }).catch(err => handleError(err, res, log));
+    } else {
+      create(res, status, obj, save, log);
+    }
   }
 }
 export function validateAndUpdate<T>(res: Response, status: StatusConfig, obj: T, isPatch: boolean, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: Log, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>):  void {
