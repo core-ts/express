@@ -7,6 +7,7 @@ export interface ViewService<T, ID> {
   metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
 }
+export type Load<T, ID> = ((id: ID, ctx?: any) => Promise<T|null>);
 function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>)): (id: ID, ctx?: any) => Promise<T|null> {
   if (typeof viewService === 'function') {
     return viewService;
@@ -38,8 +39,8 @@ function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: an
 }
 export class LoadController<T, ID> {
   protected keys?: Attribute[];
-  protected view: (id: ID, ctx?: any) => Promise<T|null>;
-  constructor(protected log: Log, viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>), keys?: Attributes|Attribute[]|string[]) {
+  protected view: Load<T, ID>;
+  constructor(protected log: Log, viewService: ViewService<T, ID> | Load<T, ID>, keys?: Attributes|Attribute[]|string[]) {
     this.load = this.load.bind(this);
     this.view = getViewFunc(viewService);
     this.keys = getKeysFunc(viewService, keys);
