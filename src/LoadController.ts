@@ -8,13 +8,13 @@ export interface ViewService<T, ID> {
   load(id: ID, ctx?: any): Promise<T|null>;
 }
 export type Load<T, ID> = ((id: ID, ctx?: any) => Promise<T|null>);
-function getViewFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T|null>)): (id: ID, ctx?: any) => Promise<T|null> {
+function getViewFunc<T, ID>(viewService: ViewService<T, ID> | Load<T, ID>): (id: ID, ctx?: any) => Promise<T|null> {
   if (typeof viewService === 'function') {
     return viewService;
   }
   return viewService.load;
 }
-function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>), keys?: Attributes|Attribute[]|string[]): Attribute[] | undefined {
+function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | Load<T, ID>, keys?: Attributes|Attribute[]|string[]): Attribute[] | undefined {
   if (keys) {
     if (Array.isArray(keys)) {
       if (keys.length > 0) {

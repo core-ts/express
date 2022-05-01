@@ -151,13 +151,14 @@ export interface ModelConfig {
   updatedAt?: string;
   createdBy?: string;
   createdAt?: string;
+  version?: string;
 }
 export function useBuild<T>(c: ModelConfig, generate?: (() => string)): Build<T> {
-  const b = new Builder<T>(generate, c.id ? c.id : '', c.payload ? c.payload : '', c.user ? c.user : '', c.updatedBy ? c.updatedBy : '', c.updatedAt ? c.updatedAt : '', c.createdBy ? c.createdBy : '', c.createdAt ? c.createdAt : '');
+  const b = new Builder<T>(generate, c.id ? c.id : '', c.payload ? c.payload : '', c.user ? c.user : '', c.updatedBy ? c.updatedBy : '', c.updatedAt ? c.updatedAt : '', c.createdBy ? c.createdBy : '', c.createdAt ? c.createdAt : '', c.version ? c.version : '');
   return b.build;
 }
 export class Builder<T> {
-  constructor(public generate: (() => string)|undefined, public id: string, public payload: string, public user: string, public updatedBy: string, public updatedAt: string, public createdBy: string, public createdAt: string) {
+  constructor(public generate: (() => string)|undefined, public id: string, public payload: string, public user: string, public updatedBy: string, public updatedAt: string, public createdBy: string, public createdAt: string, public version: string) {
     this.build = this.build.bind(this);
   }
   build(res: Response, obj: T, isCreate?: boolean, isPatch?: boolean): void {
@@ -188,6 +189,9 @@ export class Builder<T> {
         if (this.createdBy.length > 0) {
           o[this.createdBy] = usr;
         }
+      }
+      if (this.version.length > 0) {
+        o[this.version] = 1;
       }
     } else if (isPatch) {
       const keys = Object.keys(o);
