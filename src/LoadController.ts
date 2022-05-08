@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {attrs, handleError, Log, minimize, respondModel} from './http';
+import {attrs, handleError, Log, minimize, queryNumber, respondModel} from './http';
 import {Attribute, Attributes} from './metadata';
 import {buildAndCheckId, buildKeys} from './view';
 
@@ -51,6 +51,38 @@ export class LoadController<T, ID> {
       this.view(id)
         .then(obj => respondModel(minimize(obj), res))
         .catch(err => handleError(err, res, this.log));
+    }
+  }
+}
+// tslint:disable-next-line:max-classes-per-file
+export class QueryController<T> {
+  constructor(protected log: Log, private loadData: (keyword: string, max?: number) => Promise<T>, name?: string, protected param?: boolean, max?: number, maxName?: string) {
+    this.name = (name && name.length > 0 ? name : 'keyword');
+    this.max = (max && max > 0 ? max : 20);
+    this.maxName = (maxName && maxName.length > 0 ? maxName : 'max');
+    this.load = this.load.bind(this);
+    this.query = this.query.bind(this);
+  }
+  name: string;
+  max: number;
+  maxName: string;
+  query(req: Request, res: Response) {
+    return this.load(req, res);
+  }
+  load(req: Request, res: Response) {
+    const v = this.param ? req.params[this.name] : req.query[this.name];
+    if (!v) {
+      res.status(400).end(`'${this.name}' cannot be empty`);
+    } else {
+      const s = v.toString();
+      if (s.length === 0) {
+        res.status(400).end(`'${this.name}' cannot be empty`);
+      } else {
+        const max = queryNumber(req, this.maxName, this.max);
+        this.loadData(s, max)
+          .then(result => respondModel(minimize(result), res))
+          .catch(err => handleError(err, res, this.log));
+      }
     }
   }
 }

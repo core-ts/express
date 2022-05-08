@@ -20,7 +20,7 @@ export interface GenericService<T, ID, R> {
 export class GenericController<T, ID> extends LoadController<T, ID> {
   status: StatusConfig;
   metadata?: Attributes;
-  constructor(log: Log, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public validate?: Validate<T>, public build?: Build<T>) {
+  constructor(log: Log, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public build?: Build<T>, public validate?: Validate<T>) {
     super(log, service);
     this.status = initializeStatus(status);
     if (service.metadata) {
@@ -157,12 +157,13 @@ export function useBuild<T>(c: ModelConfig, generate?: (() => string)): Build<T>
   const b = new Builder<T>(generate, c.id ? c.id : '', c.payload ? c.payload : '', c.user ? c.user : '', c.updatedBy ? c.updatedBy : '', c.updatedAt ? c.updatedAt : '', c.createdBy ? c.createdBy : '', c.createdAt ? c.createdAt : '', c.version ? c.version : '');
   return b.build;
 }
+// tslint:disable-next-line:max-classes-per-file
 export class Builder<T> {
   constructor(public generate: (() => string)|undefined, public id: string, public payload: string, public user: string, public updatedBy: string, public updatedAt: string, public createdBy: string, public createdAt: string, public version: string) {
     this.build = this.build.bind(this);
   }
   build(res: Response, obj: T, isCreate?: boolean, isPatch?: boolean): void {
-    let o: any = obj;
+    const o: any = obj;
     let usr = '';
     if (this.user.length > 0) {
       if (this.payload.length > 0) {

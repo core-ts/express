@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import {ResultInfo, StatusConfig} from './edit';
-import {GenericController, GenericService} from './GenericController';
+import {Build, GenericController, GenericService} from './GenericController';
 import {handleError, Log} from './http';
 import {ErrorMessage} from './metadata';
 import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
@@ -19,8 +19,8 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
-    super(log, lowCodeService, config, validate);
+  constructor(log: Log, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+    super(log, lowCodeService, config, build, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
     if (this.config) {
