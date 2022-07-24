@@ -13,7 +13,7 @@ export {HealthController as HealthHandler};
 export {LogController as LogHandler};
 export {LoadController as LoadHandler};
 export {LoadController as ViewHandler};
-export {LoadController as ViewController};
+// export {LoadController as ViewController};
 
 export {GenericController as GenericHandler};
 export {SearchController as SearchHandler};
