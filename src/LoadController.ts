@@ -55,7 +55,7 @@ export class LoadController<T, ID> {
   }
 }
 // tslint:disable-next-line:max-classes-per-file
-export class QueryController<T> {
+export class ItemController<T> {
   constructor(protected log: Log, private loadData: (keyword: string, max?: number) => Promise<T>, name?: string, protected param?: boolean, max?: number, maxName?: string) {
     this.name = (name && name.length > 0 ? name : 'keyword');
     this.max = (max && max > 0 ? max : 20);
@@ -86,3 +86,4 @@ export class QueryController<T> {
     }
   }
 }
+export {ItemController as ItemHandler};

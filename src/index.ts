@@ -19,9 +19,7 @@ export {GenericController as GenericHandler};
 export {SearchController as SearchHandler};
 export {LoadSearchController as LoadSearchHandler};
 export {GenericSearchController as GenericSearchHandler};
-export {Controller as LowCodeHandler};
-// export {Controller as Handler};
-export {Controller as LowCodeController};
+export {Controller as Handler};
 export {Service as LowCodeService};
 
 export * from './health';
@@ -80,4 +78,31 @@ export function allow(access: AccessConfig): (req: Request, res: Response, next:
     res.setHeader('Access-Control-Allow-Headers', access.headers);
     next();
   };
+}
+export interface SavedService<T> {
+  load(id: string): Promise<T[]>;
+  save(id: string, itemId: string): Promise<number>;
+}
+export class SavedController<T> {
+  constructor(public log: (msg: string) => void, public service: SavedService<T>, public item: string, id?: string) {
+    this.id = (id && id.length > 0 ? id : 'id');
+    this.save = this.save.bind(this);
+    this.load = this.load.bind(this);
+  }
+  id: string;
+  save(req: Request, res: Response) {
+    const id = req.params[this.id];
+    const itemId = req.params[this.item];
+    this.service.save(id, itemId).then(data => {
+      res.status(200).json(data).end();
+    })
+    .catch(err => console.log(err));
+  }
+  load(req: Request, res: Response) {
+    const id = req.params[this.id];
+    this.service.load(id).then(data => {
+      res.status(200).json(data).send();
+    })
+    .catch(err => console.log(err));
+  }
 }

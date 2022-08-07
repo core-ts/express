@@ -46,6 +46,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
       .catch(err => handleError(err, res, this.log));
   }
 }
+export {LowcodeController as LowcodeHandler};
 export class Controller<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;

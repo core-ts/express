@@ -67,7 +67,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
       .catch(err => handleError(err, res, this.log));
   }
 }
-export class ViewController<T, ID, S extends Filter> extends LoadController<T, ID> {
+export class QueryController<T, ID, S extends Filter> extends LoadController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
   dates?: string[];
@@ -75,9 +75,10 @@ export class ViewController<T, ID, S extends Filter> extends LoadController<T, I
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, protected query: Query<T, ID, S>, config?: SearchConfig|boolean, dates?: string[], numbers?: string[]) {
+  constructor(log: Log, protected query: Query<T, ID, S>, config?: SearchConfig|boolean, dates?: string[], numbers?: string[], array?: string[]) {
     super(log, query);
     this.search = this.search.bind(this);
+    this.array = array;
     if (config) {
       if (typeof config === 'boolean') {
         this.csv = config;
@@ -108,3 +109,4 @@ export class ViewController<T, ID, S extends Filter> extends LoadController<T, I
       .catch(err => handleError(err, res, this.log));
   }
 }
+export {QueryController as QueryHandler};
