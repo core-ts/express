@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import {GenericController} from './GenericController';
 import {GenericSearchController} from './GenericSearchController';
 import {HealthController} from './HealthController';
+import {handleError, Log} from './http';
 import {LoadController} from './LoadController';
 import {LoadSearchController} from './LoadSearchController';
 import {LogController} from './LogController';
@@ -82,27 +83,117 @@ export function allow(access: AccessConfig): (req: Request, res: Response, next:
 export interface SavedService<T> {
   load(id: string): Promise<T[]>;
   save(id: string, itemId: string): Promise<number>;
+  unsave(id: string, itemId: string): Promise<number>;
 }
 export class SavedController<T> {
   constructor(public log: (msg: string) => void, public service: SavedService<T>, public item: string, id?: string) {
     this.id = (id && id.length > 0 ? id : 'id');
     this.save = this.save.bind(this);
+    this.unsave = this.unsave.bind(this);
     this.load = this.load.bind(this);
   }
   id: string;
   save(req: Request, res: Response) {
     const id = req.params[this.id];
     const itemId = req.params[this.item];
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
+    if (!itemId || itemId.length === 0) {
+      res.status(400).end(`'${this.item}' cannot be empty`);
+      return;
+    }
     this.service.save(id, itemId).then(data => {
       res.status(200).json(data).end();
     })
-    .catch(err => console.log(err));
+    .catch(err => handleError(err, res, this.log));
+  }
+  unsave(req: Request, res: Response) {
+    const id = req.params[this.id];
+    const itemId = req.params[this.item];
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
+    if (!itemId || itemId.length === 0) {
+      res.status(400).end(`'${this.item}' cannot be empty`);
+      return;
+    }
+    this.service.unsave(id, itemId).then(data => {
+      res.status(200).json(data).end();
+    })
+    .catch(err => handleError(err, res, this.log));
   }
   load(req: Request, res: Response) {
     const id = req.params[this.id];
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
     this.service.load(id).then(data => {
       res.status(200).json(data).send();
     })
-    .catch(err => console.log(err));
+    .catch(err => handleError(err, res, this.log));
+  }
+}
+export interface FollowService {
+  follow(id: string, target: string): Promise<number | undefined>;
+  unfollow(id: string, target: string): Promise<number>;
+  checkFollow(id: string, target: string): Promise<number>;
+}
+// tslint:disable-next-line:max-classes-per-file
+export class FollowController {
+  constructor(public log: Log, public service: FollowService, public target: string, id: string) {
+    this.id = (id && id.length > 0 ? id : 'id');
+    this.follow = this.follow.bind(this);
+    this.unfollow = this.unfollow.bind(this);
+    this.checkfollow = this.checkfollow.bind(this);
+  }
+  id: string;
+  follow(req: Request, res: Response): void {
+    const id = req.params.id;
+    const target = req.params.target;
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
+    if (!target || target.length === 0) {
+      res.status(400).end(`'${this.target}' cannot be empty`);
+      return;
+    }
+    this.service.follow(id, target).then(count => {
+      return res.status(200).json(count).end();
+    }).catch(err => handleError(err, res, this.log));
+  }
+  unfollow(req: Request, res: Response): void {
+    const id = req.params.id;
+    const target = req.params.target;
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
+    if (!target || target.length === 0) {
+      res.status(400).end(`'${this.target}' cannot be empty`);
+      return;
+    }
+    this.service.unfollow(id, target).then(count => {
+      return res.status(200).json(count).end();
+    }).catch(err => handleError(err, res, this.log));
+  }
+  checkfollow(req: Request, res: Response): void {
+    const id = req.params.id;
+    const target = req.params.target;
+    if (!id || id.length === 0) {
+      res.status(400).end(`'${this.id}' cannot be empty`);
+      return;
+    }
+    if (!target || target.length === 0) {
+      res.status(400).end(`'${this.target}' cannot be empty`);
+      return;
+    }
+    this.service.checkFollow(id, target).then(count => {
+      return res.status(200).json(count).end();
+    }).catch(err => handleError(err, res, this.log));
   }
 }
