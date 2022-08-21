@@ -83,13 +83,13 @@ export function allow(access: AccessConfig): (req: Request, res: Response, next:
 export interface SavedService<T> {
   load(id: string): Promise<T[]>;
   save(id: string, itemId: string): Promise<number>;
-  unsave(id: string, itemId: string): Promise<number>;
+  remove(id: string, itemId: string): Promise<number>;
 }
 export class SavedController<T> {
   constructor(public log: (msg: string) => void, public service: SavedService<T>, public item: string, id?: string) {
     this.id = (id && id.length > 0 ? id : 'id');
     this.save = this.save.bind(this);
-    this.unsave = this.unsave.bind(this);
+    this.remove = this.remove.bind(this);
     this.load = this.load.bind(this);
   }
   id: string;
@@ -109,7 +109,7 @@ export class SavedController<T> {
     })
     .catch(err => handleError(err, res, this.log));
   }
-  unsave(req: Request, res: Response) {
+  remove(req: Request, res: Response) {
     const id = req.params[this.id];
     const itemId = req.params[this.item];
     if (!id || id.length === 0) {
@@ -120,7 +120,7 @@ export class SavedController<T> {
       res.status(400).end(`'${this.item}' cannot be empty`);
       return;
     }
-    this.service.unsave(id, itemId).then(data => {
+    this.service.remove(id, itemId).then(data => {
       res.status(200).json(data).end();
     })
     .catch(err => handleError(err, res, this.log));
@@ -148,7 +148,7 @@ export class FollowController {
     this.id = (id && id.length > 0 ? id : 'id');
     this.follow = this.follow.bind(this);
     this.unfollow = this.unfollow.bind(this);
-    this.checkfollow = this.checkfollow.bind(this);
+    this.checkFollow = this.checkFollow.bind(this);
   }
   id: string;
   follow(req: Request, res: Response): void {
@@ -181,7 +181,7 @@ export class FollowController {
       return res.status(200).json(count).end();
     }).catch(err => handleError(err, res, this.log));
   }
-  checkfollow(req: Request, res: Response): void {
+  checkFollow(req: Request, res: Response): void {
     const id = req.params.id;
     const target = req.params.target;
     if (!id || id.length === 0) {
