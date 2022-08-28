@@ -132,7 +132,7 @@ export class SavedController<T> {
       return;
     }
     this.service.load(id).then(data => {
-      res.status(200).json(data).send();
+      res.status(200).json(data).end();
     })
     .catch(err => handleError(err, res, this.log));
   }
