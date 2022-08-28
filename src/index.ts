@@ -203,7 +203,7 @@ export interface ReactService {
   checkReaction(id: string, author: string): Promise<number>;
 }
 // tslint:disable-next-line:max-classes-per-file
-export class ReactionController {
+export class UserReactionController {
   constructor(public log: Log, public service: ReactService, public author: string, id: string, public reaction: string) {
     this.id = (id && id.length > 0 ? id : 'id');
     this.react = this.react.bind(this);
@@ -267,5 +267,5 @@ export class ReactionController {
     }).catch(err => handleError(err, res, this.log));
   }
 }
-export const ReactController = ReactionController;
-export const UserReactionController = ReactionController;
+export const ReactController = UserReactionController;
+export const ReactionController = UserReactionController;
