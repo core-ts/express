@@ -1,8 +1,22 @@
-import {Request, Response} from 'express';
-import {Attribute} from './metadata';
+import { Request, Response } from 'express';
+import { Attribute } from './metadata';
 
 export type Log = (msg: string) => void;
 export type LogFunc = Log;
+
+Object.defineProperty(Error.prototype, 'toJSON', {
+  value() {
+    const alt:any = {};
+    Object.getOwnPropertyNames(this).forEach(function (key) {
+      // @ts-ignore
+      alt[key] = this[key];
+    }, this);
+
+    return alt;
+  },
+  configurable: true,
+  writable: true
+});
 export function handleError(err: any, res: Response, log?: (msg: string) => void) {
   if (log) {
     log(toString(err));
@@ -20,12 +34,12 @@ export function toString(v: any): string {
   }
 }
 export function attr(name: string): Attribute {
-  return {name, type: 'string'};
+  return { name, type: 'string' };
 }
 export function attrs(keys: string[]): Attribute[] {
   const atts: Attribute[] = [];
   for (const str of keys) {
-    const at: Attribute = {name: str as string, type: 'string'};
+    const at: Attribute = { name: str as string, type: 'string' };
     atts.push(at);
   }
   return atts;
@@ -53,7 +67,7 @@ export function queryRequiredParams(req: Request, res: Response, name: string, s
   }
   return v2.split(split);
 }
-export function queryParams(req: Request, name: string, d?: string[], split?: string): string[]|undefined {
+export function queryParams(req: Request, name: string, d?: string[], split?: string): string[] | undefined {
   const q = req.query[name];
   if (!q) {
     return d;
@@ -67,7 +81,7 @@ export function queryParams(req: Request, name: string, d?: string[], split?: st
   }
   return v.split(split);
 }
-export function queryParam(req: Request, res: Response, name: string): string|undefined {
+export function queryParam(req: Request, res: Response, name: string): string | undefined {
   const v = req.query[name];
   if (!v) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -82,14 +96,14 @@ export function queryParam(req: Request, res: Response, name: string): string|un
     }
   }
 }
-export function query(req: Request, name: string, d?: string): string|undefined {
+export function query(req: Request, name: string, d?: string): string | undefined {
   const p = req.query[name];
   if (!p || p.toString().length === 0) {
     return d;
   }
   return p.toString();
 }
-export function queryRequiredNumber(req: Request, res: Response, name: string): number|undefined {
+export function queryRequiredNumber(req: Request, res: Response, name: string): number | undefined {
   const field = req.query[name];
   if (!field) {
     return undefined;
@@ -106,7 +120,7 @@ export function queryRequiredNumber(req: Request, res: Response, name: string): 
   const n = parseFloat(v);
   return n;
 }
-export function queryNumber(req: Request, name: string, d?: number): number|undefined {
+export function queryNumber(req: Request, name: string, d?: number): number | undefined {
   const field = req.query[name];
   const v = field ? field.toString() : undefined;
   if (!v || v.length === 0) {
@@ -118,7 +132,7 @@ export function queryNumber(req: Request, name: string, d?: number): number|unde
   const n = parseFloat(v);
   return n;
 }
-export function queryRequiredDate(req: Request, res: Response, name: string): Date|undefined {
+export function queryRequiredDate(req: Request, res: Response, name: string): Date | undefined {
   const field = req.query[name];
   if (!field) {
     return undefined;
@@ -135,7 +149,7 @@ export function queryRequiredDate(req: Request, res: Response, name: string): Da
   }
   return date;
 }
-export function queryDate(req: Request, name: string, d?: Date): Date|undefined {
+export function queryDate(req: Request, name: string, d?: Date): Date | undefined {
   const field = req.query[name];
   if (field) {
     const v = field.toString();
@@ -150,8 +164,7 @@ export function queryDate(req: Request, name: string, d?: Date): Date|undefined 
   }
   return undefined;
 }
-
-export function param(req: Request, res: Response, name: string): string|undefined {
+export function param(req: Request, res: Response, name: string): string | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -160,7 +173,7 @@ export function param(req: Request, res: Response, name: string): string|undefin
   return v;
 }
 export const getParam = param;
-export function params(req: Request, name: string, d?: string[], split?: string): string[]|undefined {
+export function params(req: Request, name: string, d?: string[], split?: string): string[] | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;
@@ -171,7 +184,7 @@ export function params(req: Request, name: string, d?: string[], split?: string)
   return v.split(split);
 }
 export const getParams = params;
-export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[]|undefined {
+export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[] | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -182,7 +195,7 @@ export function getRequiredParameters(req: Request, res: Response, name: string,
   }
   return v.split(split);
 }
-export function getRequiredNumber(req: Request, res: Response, name: string): number|undefined {
+export function getRequiredNumber(req: Request, res: Response, name: string): number | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -195,7 +208,7 @@ export function getRequiredNumber(req: Request, res: Response, name: string): nu
   const n = parseFloat(v);
   return n;
 }
-export function getNumber(req: Request, name: string, d?: number): number|undefined {
+export function getNumber(req: Request, name: string, d?: number): number | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;

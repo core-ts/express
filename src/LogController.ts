@@ -69,7 +69,7 @@ export class LogController {
   }
   config(req: Request, res: Response) {
     const obj: LogConfig = req.body;
-    if (!obj || obj === '') {
+    if (!obj || (obj as any) === '') {
       return res.status(400).end('The request body cannot be empty');
     }
     if (!this.logger) {
