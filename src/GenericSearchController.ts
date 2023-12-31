@@ -1,13 +1,10 @@
 import {Request, Response} from 'express';
-import {ResultInfo, StatusConfig} from './edit';
 import {Build, GenericController, GenericService} from './GenericController';
 import {handleError, Log} from './http';
 import {ErrorMessage} from './metadata';
 import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
-export interface Config extends StatusConfig, SearchConfig {
-}
 export class GenericSearchController<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
   csv?: boolean;
@@ -16,8 +13,8 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ResultInfo<T>>, config?: Config, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
-    super(log, service, config, build, validate);
+  constructor(log: Log, public find: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>, service: GenericService<T, ID, number|ErrorMessage[]>, config?: SearchConfig, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+    super(log, service, build, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
     if (this.config) {

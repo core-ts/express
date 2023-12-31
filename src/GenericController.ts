@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {checkId, create, initializeStatus, isTypeError, ResultInfo, StatusConfig, update} from './edit';
+import {checkId, create, isTypeError, update} from './edit';
 import {handleError, Log} from './http';
 import {LoadController} from './LoadController';
 import {Attribute, Attributes, ErrorMessage} from './metadata';
@@ -8,7 +8,7 @@ import {buildAndCheckId, buildId} from './view';
 
 export type Build<T> = (res: Response, obj: T, isCreate?: boolean, isPatch?: boolean) => void;
 export type Validate<T> = (obj: T, patch?: boolean) => Promise<ErrorMessage[]>;
-export type Save<T> = (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>;
+export type Save<T> = (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>;
 export interface GenericService<T, ID, R> {
   metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
@@ -18,11 +18,11 @@ export interface GenericService<T, ID, R> {
   delete?(id: ID, ctx?: any): Promise<number>;
 }
 export class GenericController<T, ID> extends LoadController<T, ID> {
-  status: StatusConfig;
   metadata?: Attributes;
-  constructor(log: Log, public service: GenericService<T, ID, number|ResultInfo<T>>, status?: StatusConfig, public build?: Build<T>, public validate?: Validate<T>) {
+  returnNumber?: boolean;
+  constructor(log: Log, public service: GenericService<T, ID, number|ErrorMessage[]>, public build?: Build<T>, public validate?: Validate<T>, returnNumber?: boolean) {
     super(log, service);
-    this.status = initializeStatus(status);
+    this.returnNumber = returnNumber;
     if (service.metadata) {
       const m = service.metadata();
       if (m) {
@@ -43,18 +43,18 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     return this.insert(req, res);
   }
   insert(req: Request, res: Response): void {
-    validateAndCreate(req, res, this.status, this.service.insert, this.log, this.validate, this.build);
+    validateAndCreate(req, res, this.service.insert, this.log, this.validate, this.build);
   }
   update(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update);
     if (id) {
-      validateAndUpdate(res, this.status, req.body, false, this.service.update, this.log, this.validate, this.build);
+      validateAndUpdate(res, req.body, false, this.service.update, this.log, this.validate, this.build);
     }
   }
   patch(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.patch);
     if (id && this.service.patch) {
-      validateAndUpdate(res, this.status, req.body, true, this.service.patch, this.log, this.validate, this.build);
+      validateAndUpdate(res, req.body, true, this.service.patch, this.log, this.validate, this.build);
     }
   }
   delete(req: Request, res: Response): void {
@@ -70,7 +70,7 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     }
   }
 }
-export function validateAndCreate<T>(req: Request, res: Response, status: StatusConfig, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>): void {
+export function validateAndCreate<T>(req: Request, res: Response, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>, returnNumber?: boolean): void {
   const obj = req.body;
   if (!obj || obj === '') {
     res.status(400).end('The request body cannot be empty.');
@@ -78,35 +78,33 @@ export function validateAndCreate<T>(req: Request, res: Response, status: Status
     if (validate) {
       validate(obj).then(errors => {
         if (errors && errors.length > 0) {
-          const r: ResultInfo<T> = {status: status.validation_error, errors};
-          res.status(getStatusCode(errors)).json(r).end();
+          res.status(getStatusCode(errors)).json(errors).end();
         } else {
           if (build) {
             build(res, obj, true);
           }
-          create(res, status, obj, save, log);
+          create(res, obj, save, log, returnNumber);
         }
       }).catch(err => handleError(err, res, log));
     } else {
-      create(res, status, obj, save, log);
+      create(res, obj, save, log, returnNumber);
     }
   }
 }
-export function validateAndUpdate<T>(res: Response, status: StatusConfig, obj: T, isPatch: boolean, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>):  void {
+export function validateAndUpdate<T>(res: Response, obj: T, isPatch: boolean, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>, returnNumber?: boolean):  void {
   if (validate) {
     validate(obj, isPatch).then(errors => {
       if (errors && errors.length > 0) {
-        const r: ResultInfo<T> = {status: status.validation_error, errors};
-        res.status(getStatusCode(errors)).json(r).end();
+        res.status(getStatusCode(errors)).json(errors).end();
       } else {
         if (build) {
           build(res, obj, false, isPatch);
         }
-        update(res, status, obj, save, log);
+        update(res, obj, save, log, returnNumber);
       }
     }).catch(err => handleError(err, res, log));
   } else {
-    update(res, status, obj, save, log);
+    update(res, obj, save, log, returnNumber);
   }
 }
 export function buildAndCheckIdWithBody<T, ID, R>(req: Request, res: Response, keys?: Attribute[], patch?: (obj: T, ctx?: any) => Promise<R>): ID | undefined {

@@ -1,13 +1,10 @@
 import {Request, Response} from 'express';
-import {ResultInfo, StatusConfig} from './edit';
 import {Build, GenericController, GenericService} from './GenericController';
 import {handleError, Log} from './http';
 import {ErrorMessage} from './metadata';
 import {buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult} from './search';
 import {getMetadataFunc} from './search_func';
 
-export interface LowCodeConfig extends StatusConfig, SearchConfig {
-}
 export interface Service<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
   search: (s: S, limit?: number, skip?: number|string, fields?: string[]) => Promise<SearchResult<T>>;
 }
@@ -19,8 +16,8 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, config?: LowCodeConfig, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
-    super(log, lowCodeService, config, build, validate);
+  constructor(log: Log, public lowCodeService: Service<T, ID, number|ErrorMessage[], S>, config?: SearchConfig, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, dates?: string[], numbers?: string[]) {
+    super(log, lowCodeService, build, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
     if (this.config) {
@@ -55,8 +52,8 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, public lowCodeService: Service<T, ID, number|ResultInfo<T>, S>, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, config?: LowCodeConfig, dates?: string[], numbers?: string[]) {
-    super(log, lowCodeService, config, build, validate);
+  constructor(log: Log, public lowCodeService: Service<T, ID, number|ErrorMessage[], S>, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, config?: SearchConfig, dates?: string[], numbers?: string[]) {
+    super(log, lowCodeService, build, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
     if (this.config) {

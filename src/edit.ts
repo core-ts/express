@@ -1,7 +1,7 @@
 import {Response} from 'express';
 import {handleError} from './http';
 import {Attribute, ErrorMessage} from './metadata';
-
+/*
 export interface StatusConfig {
   duplicate_key: number|string;
   not_found: number|string;
@@ -30,6 +30,7 @@ export function initializeStatus(s?: StatusConfig): StatusConfig {
   };
   return s1;
 }
+*/
 export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   const n: string = (keys && keys.length === 1 && keys[0].name ? keys[0].name : 'id');
   const o: any = obj;
@@ -61,38 +62,31 @@ export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   }
   return true;
 }
-export function create<T>(res: Response, status: StatusConfig, obj: T, insert: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: (msg: string, ctx?: any) => void): void {
+export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
   insert(obj).then(result => {
     if (typeof result === 'number') {
       if (result >= 1) {
-        const r: ResultInfo<T> = {status: status.success, value: obj};
-        res.status(201).json(r).end();
-      } else if (result === 0) {
-        const r: ResultInfo<T> = {status: status.duplicate_key};
-        res.status(201).json(r).end();
+        res.status(201).json(returnNumber ? result : obj).end();
       } else {
-        res.status(500).end('Internal Server Error');
+        res.status(409).json(result).end();
       }
     } else {
-      res.status(200).json(result).end();
+      res.status(422).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }
-export function update<T>(res: Response, status: StatusConfig, obj: T, save: (obj: T, ctx?: any) => Promise<number|ResultInfo<T>>, log: (msg: string, ctx?: any) => void): void {
+export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
   save(obj).then(result => {
     if (typeof result === 'number') {
       if (result >= 1) {
-        const r: ResultInfo<T> = {status: status.success, value: obj};
-        res.status(201).json(r).end();
+        res.status(200).json(returnNumber ? result : obj).end();
       } else if (result === 0) {
-        const r: ResultInfo<T> = {status: status.not_found};
-        res.status(404).json(r).end();
+        res.status(404).json(result).end();
       } else {
-        const r: ResultInfo<T> = {status: status.not_found};
-        res.status(409).json(r).end();
+        res.status(409).json(result).end();
       }
     } else {
-      res.status(200).json(result).end();
+      res.status(422).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }
