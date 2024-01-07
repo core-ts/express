@@ -8,7 +8,7 @@ import {buildAndCheckId, buildId} from './view';
 
 export type Build<T> = (res: Response, obj: T, isCreate?: boolean, isPatch?: boolean) => void;
 export type Validate<T> = (obj: T, patch?: boolean) => Promise<ErrorMessage[]>;
-export type Save<T> = (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>;
+export type Save<T> = (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>;
 export interface GenericService<T, ID, R> {
   metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
@@ -20,7 +20,7 @@ export interface GenericService<T, ID, R> {
 export class GenericController<T, ID> extends LoadController<T, ID> {
   metadata?: Attributes;
   returnNumber?: boolean;
-  constructor(log: Log, public service: GenericService<T, ID, number|ErrorMessage[]>, public build?: Build<T>, public validate?: Validate<T>, returnNumber?: boolean) {
+  constructor(log: Log, public service: GenericService<T, ID, number|T|ErrorMessage[]>, public build?: Build<T>, public validate?: Validate<T>, returnNumber?: boolean) {
     super(log, service);
     this.returnNumber = returnNumber;
     if (service.metadata) {

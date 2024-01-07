@@ -62,7 +62,7 @@ export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   }
   return true;
 }
-export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
+export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
   insert(obj).then(result => {
     if (typeof result === 'number') {
       if (result >= 1) {
@@ -70,12 +70,14 @@ export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => 
       } else {
         res.status(409).json(result).end();
       }
-    } else {
+    } else if (Array.isArray(result)) {
       res.status(422).json(result).end();
+    } else {
+      res.status(201).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }
-export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Promise<number|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
+export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
   save(obj).then(result => {
     if (typeof result === 'number') {
       if (result >= 1) {
@@ -85,8 +87,10 @@ export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Pr
       } else {
         res.status(409).json(result).end();
       }
-    } else {
+    } else if (Array.isArray(result)) {
       res.status(422).json(result).end();
+    } else {
+      res.status(200).json(result).end();
     }
   }).catch(err => handleError(err, res, log));
 }

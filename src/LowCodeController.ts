@@ -52,7 +52,7 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
   fields?: string;
   excluding?: string;
   array?: string[];
-  constructor(log: Log, public lowCodeService: Service<T, ID, number|ErrorMessage[], S>, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, config?: SearchConfig, dates?: string[], numbers?: string[]) {
+  constructor(log: Log, public lowCodeService: Service<T, ID, number|T|ErrorMessage[], S>, build?: Build<T>, validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>, config?: SearchConfig, dates?: string[], numbers?: string[]) {
     super(log, lowCodeService, build, validate);
     this.search = this.search.bind(this);
     this.config = initializeConfig(config);
