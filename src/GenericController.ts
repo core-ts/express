@@ -12,7 +12,7 @@ export type Save<T> = (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>;
 export interface GenericService<T, ID, R> {
   metadata?(): Attributes|undefined;
   load(id: ID, ctx?: any): Promise<T|null>;
-  insert(obj: T, ctx?: any): Promise<R>;
+  create(obj: T, ctx?: any): Promise<R>;
   update(obj: T, ctx?: any): Promise<R>;
   patch?(obj: Partial<T>, ctx?: any): Promise<R>;
   delete?(id: ID, ctx?: any): Promise<number>;
@@ -30,7 +30,6 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
       }
     }
     this.create = this.create.bind(this);
-    this.insert = this.insert.bind(this);
     this.update = this.update.bind(this);
     this.patch = this.patch.bind(this);
     this.delete = this.delete.bind(this);
@@ -40,10 +39,7 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     }
   }
   create(req: Request, res: Response): void {
-    return this.insert(req, res);
-  }
-  insert(req: Request, res: Response): void {
-    validateAndCreate(req, res, this.service.insert, this.log, this.validate, this.build);
+    validateAndCreate(req, res, this.service.create, this.log, this.validate, this.build);
   }
   update(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update);
