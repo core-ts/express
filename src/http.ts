@@ -6,7 +6,7 @@ export type LogFunc = Log;
 
 Object.defineProperty(Error.prototype, 'toJSON', {
   value() {
-    const alt:any = {};
+    const alt: any = {};
     Object.getOwnPropertyNames(this).forEach(function (key) {
       // @ts-ignore
       alt[key] = this[key];
@@ -15,7 +15,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
     return alt;
   },
   configurable: true,
-  writable: true
+  writable: true,
 });
 export function handleError(err: any, res: Response, log?: (msg: string) => void) {
   if (log) {
@@ -51,7 +51,7 @@ export function respondModel<T>(obj: T, res: Response): void {
     res.status(404).json(null).end();
   }
 }
-export function queryRequiredParams(req: Request, res: Response, name: string, split?: string): string[]|undefined {
+export function queryRequiredParams(req: Request, res: Response, name: string, split?: string): string[] | undefined {
   const v = req.query[name];
   if (!v) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -120,7 +120,7 @@ export function queryRequiredNumber(req: Request, res: Response, name: string): 
   const n = parseFloat(v);
   return n;
 }
-export function queryNumber(req: Request, name: string, d?: number): number | undefined {
+export function queryNumber(req: Request, name: string, d: number): number {
   const field = req.query[name];
   const v = field ? field.toString() : undefined;
   if (!v || v.length === 0) {
@@ -219,7 +219,7 @@ export function getNumber(req: Request, name: string, d?: number): number | unde
   const n = parseFloat(v);
   return n;
 }
-export function getInteger(req: Request, name: string, d?: number): number|undefined {
+export function getInteger(req: Request, name: string, d?: number): number | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;
@@ -231,7 +231,7 @@ export function getInteger(req: Request, name: string, d?: number): number|undef
   const s = n.toFixed(0);
   return parseFloat(s);
 }
-export function getRequiredDate(req: Request, res: Response, name: string): Date|undefined {
+export function getRequiredDate(req: Request, res: Response, name: string): Date | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`);
@@ -244,7 +244,7 @@ export function getRequiredDate(req: Request, res: Response, name: string): Date
   }
   return date;
 }
-export function getDate(req: Request, name: string, d?: Date): Date|undefined {
+export function getDate(req: Request, name: string, d?: Date): Date | undefined {
   const v = req.params[name];
   if (!v || v.length === 0) {
     return d;

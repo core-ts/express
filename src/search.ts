@@ -1,6 +1,6 @@
-import {Request, Response} from 'express';
-import {minimizeArray} from './http';
-import {Attribute, Attributes} from './metadata';
+import { Request, Response } from 'express';
+import { minimizeArray } from './http';
+import { Attribute, Attributes } from './metadata';
 
 export interface Filter {
   fields?: string[];
@@ -29,6 +29,81 @@ export interface SearchResult<T> {
   last?: boolean;
 }
 
+export function getOffset(limit: number, page: number): number {
+  const offset = limit * (page - 1);
+  return offset < 0 ? 0 : offset;
+}
+
+export function getPageTotal(pageSize?: number, total?: number): number {
+  if (!pageSize || pageSize <= 0) {
+    return 1;
+  } else {
+    if (!total) {
+      total = 0;
+    }
+    if (total % pageSize === 0) {
+      return Math.floor(total / pageSize);
+    }
+    return Math.floor(total / pageSize + 1);
+  }
+}
+export function buildPages(pageSize?: number, total?: number): number[] {
+  const pageTotal = getPageTotal(pageSize, total);
+  if (pageTotal <= 1) {
+    return [1];
+  }
+  const arr: number[] = [];
+  for (let i = 1; i <= pageTotal; i++) {
+    arr.push(i);
+  }
+  return arr;
+}
+export function getPageQuery(query: string, page?: string): string {
+  const s = page && page.length > 0 ? page : 'page';
+  const i = query.indexOf(s + '=');
+  if (i < 0) {
+    return '';
+  }
+  const j = query.indexOf('&', i + s.length);
+  return j < 0 ? query.substring(i) : query.substring(i, j);
+}
+const PartialTrue = 'partial=true';
+export function removePageQuery(query: string, page?: string, partialIsTrue?: string): string {
+  if (query.length == 0) {
+    return query;
+  }
+  const partialTrue = partialIsTrue && partialIsTrue.length > 0 ? partialIsTrue : PartialTrue;
+  const p1 = '&' + partialTrue;
+  const q1 = query.indexOf(p1);
+  if (q1 >= 0) {
+    query = query.substring(0, q1) + query.substring(q1 + partialTrue.length + 2);
+  } else {
+    const p2 = partialTrue + '&';
+    const q2 = query.indexOf(p2);
+    if (q2 >= 0) {
+      query = query.substring(0, q1) + query.substring(q1 + partialTrue.length + 2);
+    }
+  }
+  const pageQuery = getPageQuery(query, page);
+  if (pageQuery.length == 0) {
+    return query;
+  } else {
+    const x = pageQuery + '&';
+    if (query.indexOf(x) >= 0) {
+      return query.replace(x, '');
+    }
+    const x2 = '&' + pageQuery;
+    if (query.indexOf(x2) >= 0) {
+      return query.replace(x2, '');
+    }
+    return query.replace(pageQuery, '');
+  }
+}
+export function buildPageQuery(query: string): string {
+  const qr = removePageQuery(query);
+  return qr.length == 0 ? qr : '&' + qr;
+}
+
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {
   if (quick && fields && fields.length > 0) {
     res.status(200).json(toCsv(fields, result)).end();
@@ -41,16 +116,16 @@ export function buildResult<T>(r: SearchResult<T>, conf?: SearchConfig): any {
     return r;
   }
   const x: any = {};
-  const li = (conf.list ? conf.list : 'list');
+  const li = conf.list ? conf.list : 'list';
   x[li] = minimizeArray(r.list);
-  const to = (conf.total ? conf.total : 'total');
+  const to = conf.total ? conf.total : 'total';
   x[to] = r.total;
   if (r.nextPageToken && r.nextPageToken.length > 0) {
-    const t = (conf.token ? conf.token : 'token');
+    const t = conf.token ? conf.token : 'token';
     x[t] = r.nextPageToken;
   }
   if (r.last) {
-    const l = (conf.last ? conf.last : 'last');
+    const l = conf.last ? conf.last : 'last';
     x[l] = r.last;
   }
   return x;
@@ -71,7 +146,7 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
     limit: conf.limit,
     skip: conf.skip,
     refId: conf.refId,
-    firstLimit: conf.firstLimit
+    firstLimit: conf.firstLimit,
   };
   if (!c.excluding || c.excluding.length === 0) {
     c.excluding = 'excluding';
@@ -109,7 +184,7 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
   return c;
 }
 export function fromRequest<S>(req: Request, arr?: string[]): S {
-  const s: any = (req.method === 'GET' ? fromUrl(req, arr) : req.body);
+  const s: any = req.method === 'GET' ? fromUrl(req, arr) : req.body;
   return s;
 }
 export function buildArray(arr?: string[], s0?: string, s1?: string, s2?: string): string[] {
@@ -212,10 +287,10 @@ const setKey = (_object: any, _isArrayKey: boolean, _key: string, _nextValue: an
 };
 export interface Limit {
   limit?: number;
-  skip?: number;
-  refId?: string;
+  offset?: number;
+  nextPageToken?: string;
   fields?: string[];
-  skipOrRefId?: string|number;
+  offsetOrNextPageToken?: string | number;
 }
 export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
   const o: any = obj;
@@ -231,7 +306,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
     if (!refId) {
       refId = o['nextPageToken'];
     }
-    const r: Limit = {fields, refId};
+    const r: Limit = { fields, nextPageToken: refId };
     let pageSize = o['limit'];
     if (!pageSize) {
       pageSize = o['pageSize'];
@@ -244,8 +319,8 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
-            r.skip = iskip;
-            r.skipOrRefId = r.skip;
+            r.offset = iskip;
+            r.offsetOrNextPageToken = r.offset;
             deletePageInfo(o);
             return r;
           }
@@ -272,27 +347,27 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
-              r.skip = ipageSize * (ipageIndex - 2) + ifirstPageSize;
-              r.skipOrRefId = r.skip;
+              r.offset = ipageSize * (ipageIndex - 2) + ifirstPageSize;
+              r.offsetOrNextPageToken = r.offset;
               deletePageInfo(o);
               return r;
             }
           }
-          r.skip = ipageSize * (ipageIndex - 1);
-          r.skipOrRefId = r.skip;
+          r.offset = ipageSize * (ipageIndex - 1);
+          r.offsetOrNextPageToken = r.offset;
           deletePageInfo(o);
           return r;
         }
-        r.skip = 0;
-        if (r.refId && r.refId.length > 0) {
-          r.skipOrRefId = r.refId;
+        r.offset = 0;
+        if (r.nextPageToken && r.nextPageToken.length > 0) {
+          r.offsetOrNextPageToken = r.nextPageToken;
         }
         deletePageInfo(o);
         return r;
       }
     }
-    if (r.refId && r.refId.length > 0) {
-      r.skipOrRefId = r.refId;
+    if (r.nextPageToken && r.nextPageToken.length > 0) {
+      r.offsetOrNextPageToken = r.nextPageToken;
     }
     deletePageInfo(o);
     return r;
@@ -312,7 +387,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
       strRefId = 'refId';
     }
     const refId = o[strRefId];
-    const r: Limit = {fields, refId};
+    const r: Limit = { fields, nextPageToken: refId };
 
     let strLimit = config.limit;
     if (!strLimit || strLimit.length === 0) {
@@ -332,8 +407,8 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
-            r.skip = iskip;
-            r.skipOrRefId = r.skip;
+            r.offset = iskip;
+            r.offsetOrNextPageToken = r.offset;
             deletePageInfo(o, arr);
             return r;
           }
@@ -356,27 +431,27 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
-              r.skip = ipageSize * (ipageIndex - 2) + ifirstPageSize;
-              r.skipOrRefId = r.skip;
+              r.offset = ipageSize * (ipageIndex - 2) + ifirstPageSize;
+              r.offsetOrNextPageToken = r.offset;
               deletePageInfo(o, arr);
               return r;
             }
           }
-          r.skip = ipageSize * (ipageIndex - 1);
-          r.skipOrRefId = r.skip;
+          r.offset = ipageSize * (ipageIndex - 1);
+          r.offsetOrNextPageToken = r.offset;
           deletePageInfo(o, arr);
           return r;
         }
-        r.skip = 0;
-        if (r.refId && r.refId.length > 0) {
-          r.skipOrRefId = r.refId;
+        r.offset = 0;
+        if (r.nextPageToken && r.nextPageToken.length > 0) {
+          r.offsetOrNextPageToken = r.nextPageToken;
         }
         deletePageInfo(o, arr);
         return r;
       }
     }
-    if (r.refId && r.refId.length > 0) {
-      r.skipOrRefId = r.refId;
+    if (r.nextPageToken && r.nextPageToken.length > 0) {
+      r.offsetOrNextPageToken = r.nextPageToken;
     }
     deletePageInfo(o, arr);
     return r;

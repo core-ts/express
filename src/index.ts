@@ -1,46 +1,52 @@
-import {NextFunction, Request, Response} from 'express';
-import {GenericController} from './GenericController';
-import {GenericSearchController} from './GenericSearchController';
-import {HealthController} from './HealthController';
-import {handleError, Log} from './http';
-import {LoadController} from './LoadController';
-import {LoadSearchController} from './LoadSearchController';
-import {LogController} from './LogController';
-import {Controller} from './LowCodeController';
-import {Service} from './LowCodeController';
-import {SearchController} from './SearchController';
+import { NextFunction, Request, Response } from 'express';
+import { GenericController } from './GenericController';
+import { GenericSearchController } from './GenericSearchController';
+import { HealthController } from './HealthController';
+import { handleError, Log } from './http';
+import { LoadController } from './LoadController';
+import { LoadSearchController } from './LoadSearchController';
+import { LogController } from './LogController';
+import { Controller, Service } from './LowCodeController';
+import { SearchController } from './SearchController';
 
-export {HealthController as HealthHandler};
-export {LogController as LogHandler};
-export {LoadController as LoadHandler};
-export {LoadController as ViewHandler};
+export { HealthController as HealthHandler, LoadController as LoadHandler, LogController as LogHandler, LoadController as ViewHandler };
 // export {LoadController as ViewController};
 
-export {GenericController as GenericHandler};
-export {SearchController as SearchHandler};
-export {LoadSearchController as LoadSearchHandler};
-export {GenericSearchController as GenericSearchHandler};
-export {Controller as Handler};
-export {Service as LowCodeService};
+export {
+  GenericController as GenericHandler,
+  GenericSearchController as GenericSearchHandler,
+  Controller as Handler,
+  LoadSearchController as LoadSearchHandler,
+  Service as LowCodeService,
+  SearchController as SearchHandler,
+};
 
-export * from './health';
 export * from './client';
-export * from './HealthController';
-export * from './LogController';
-export * from './log';
-export * from './http';
-export * from './metadata';
-export * from './view';
-export * from './LoadController';
-export * from './search_func';
-export * from './search';
-export * from './SearchController';
-export * from './LoadSearchController';
-export * from './resources';
 export * from './edit';
 export * from './GenericController';
 export * from './GenericSearchController';
+export * from './health';
+export * from './HealthController';
+export * from './http';
+export * from './LoadController';
+export * from './LoadSearchController';
+export * from './log';
+export * from './LogController';
 export * from './LowCodeController';
+export * from './metadata';
+export * from './resources';
+export * from './search';
+export * from './search_func';
+export * from './SearchController';
+export * from './view';
+
+export function hasQuery(req: Request): boolean {
+  return req.url.indexOf('?') >= 0;
+}
+export function getQuery(url: string): string {
+  const i = url.indexOf('?');
+  return i < 0 ? '' : url.substring(i + 1);
+}
 
 export interface AccessConfig {
   origin?: string | string[];
@@ -87,7 +93,7 @@ export interface SavedService<T> {
 }
 export class SavedController<T> {
   constructor(public log: (msg: string) => void, public service: SavedService<T>, public item: string, id?: string) {
-    this.id = (id && id.length > 0 ? id : 'id');
+    this.id = id && id.length > 0 ? id : 'id';
     this.save = this.save.bind(this);
     this.remove = this.remove.bind(this);
     this.load = this.load.bind(this);
@@ -104,10 +110,12 @@ export class SavedController<T> {
       res.status(400).end(`'${this.item}' cannot be empty`);
       return;
     }
-    this.service.save(id, itemId).then(data => {
-      res.status(200).json(data).end();
-    })
-    .catch(err => handleError(err, res, this.log));
+    this.service
+      .save(id, itemId)
+      .then((data) => {
+        res.status(200).json(data).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   remove(req: Request, res: Response) {
     const id = req.params[this.id];
@@ -120,10 +128,12 @@ export class SavedController<T> {
       res.status(400).end(`'${this.item}' cannot be empty`);
       return;
     }
-    this.service.remove(id, itemId).then(data => {
-      res.status(200).json(data).end();
-    })
-    .catch(err => handleError(err, res, this.log));
+    this.service
+      .remove(id, itemId)
+      .then((data) => {
+        res.status(200).json(data).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   load(req: Request, res: Response) {
     const id = req.params[this.id];
@@ -131,10 +141,12 @@ export class SavedController<T> {
       res.status(400).end(`'${this.id}' cannot be empty`);
       return;
     }
-    this.service.load(id).then(data => {
-      res.status(200).json(data).end();
-    })
-    .catch(err => handleError(err, res, this.log));
+    this.service
+      .load(id)
+      .then((data) => {
+        res.status(200).json(data).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
 }
 export interface FollowService {
@@ -145,7 +157,7 @@ export interface FollowService {
 // tslint:disable-next-line:max-classes-per-file
 export class FollowController {
   constructor(public log: Log, public service: FollowService, public target: string, id: string) {
-    this.id = (id && id.length > 0 ? id : 'id');
+    this.id = id && id.length > 0 ? id : 'id';
     this.follow = this.follow.bind(this);
     this.unfollow = this.unfollow.bind(this);
     this.checkFollow = this.checkFollow.bind(this);
@@ -162,9 +174,12 @@ export class FollowController {
       res.status(400).end(`'${this.target}' cannot be empty`);
       return;
     }
-    this.service.follow(id, target).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .follow(id, target)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   unfollow(req: Request, res: Response): void {
     const id = req.params.id;
@@ -177,9 +192,12 @@ export class FollowController {
       res.status(400).end(`'${this.target}' cannot be empty`);
       return;
     }
-    this.service.unfollow(id, target).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .unfollow(id, target)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   checkFollow(req: Request, res: Response): void {
     const id = req.params.id;
@@ -192,9 +210,12 @@ export class FollowController {
       res.status(400).end(`'${this.target}' cannot be empty`);
       return;
     }
-    this.service.checkFollow(id, target).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .checkFollow(id, target)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
 }
 export interface ReactService {
@@ -205,7 +226,7 @@ export interface ReactService {
 // tslint:disable-next-line:max-classes-per-file
 export class UserReactionController {
   constructor(public log: Log, public service: ReactService, public author: string, id: string, public reaction: string) {
-    this.id = (id && id.length > 0 ? id : 'id');
+    this.id = id && id.length > 0 ? id : 'id';
     this.react = this.react.bind(this);
     this.unreact = this.unreact.bind(this);
     this.checkReaction = this.checkReaction.bind(this);
@@ -227,9 +248,12 @@ export class UserReactionController {
       res.status(400).end(`'${this.reaction}' cannot be empty`);
       return;
     }
-    this.service.react(id, author, reaction).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .react(id, author, reaction)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   unreact(req: Request, res: Response): void {
     const id = req.params.id;
@@ -247,9 +271,12 @@ export class UserReactionController {
       res.status(400).end(`'${this.reaction}' cannot be empty`);
       return;
     }
-    this.service.unreact(id, author, reaction).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .unreact(id, author, reaction)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
   checkReaction(req: Request, res: Response): void {
     const id = req.params.id;
@@ -262,9 +289,12 @@ export class UserReactionController {
       res.status(400).end(`'${this.author}' cannot be empty`);
       return;
     }
-    this.service.checkReaction(id, author).then(count => {
-      return res.status(200).json(count).end();
-    }).catch(err => handleError(err, res, this.log));
+    this.service
+      .checkReaction(id, author)
+      .then((count) => {
+        return res.status(200).json(count).end();
+      })
+      .catch((err) => handleError(err, res, this.log));
   }
 }
 export const ReactController = UserReactionController;
