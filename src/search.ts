@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
-import { minimizeArray } from './http';
+import { minimizeArray, query } from './http';
 import { Attribute, Attributes } from './metadata';
+import { resources } from './resources';
+
+const et = '';
 
 export interface Filter {
   fields?: string[];
@@ -58,61 +61,114 @@ export function buildPages(pageSize?: number, total?: number): number[] {
   }
   return arr;
 }
-export function getPageQuery(query: string, page?: string): string {
-  const s = page && page.length > 0 ? page : 'page';
-  const i = query.indexOf(s + '=');
+
+export function hasSearch(req: Request): boolean {
+  return req.url.indexOf('?') >= 0;
+}
+export function getSearch(url: string): string {
+  const i = url.indexOf('?');
+  return i < 0 ? et : url.substring(i + 1);
+}
+export function getField(search: string, fieldName: string): string {
+  let i = search.indexOf(fieldName + '=');
   if (i < 0) {
     return '';
   }
-  const j = query.indexOf('&', i + s.length);
-  return j < 0 ? query.substring(i) : query.substring(i, j);
-}
-const PartialTrue = 'partial=true';
-export function removePageQuery(query: string, page?: string, partialIsTrue?: string): string {
-  if (query.length == 0) {
-    return query;
+  if (i > 0) {
+    if (search.substring(i - 1, 1) != '&') {
+      i = search.indexOf('&' + fieldName + '=');
+      if (i < 0) {
+        return search;
+      }
+      i = i + 1;
+    }
   }
-  const partialTrue = partialIsTrue && partialIsTrue.length > 0 ? partialIsTrue : PartialTrue;
-  const p1 = '&' + partialTrue;
-  const q1 = query.indexOf(p1);
-  if (q1 >= 0) {
-    query = query.substring(0, q1) + query.substring(q1 + partialTrue.length + 2);
+  const j = search.indexOf('&', i + fieldName.length);
+  return j >= 0 ? search.substring(i, j) : search.substring(i);
+}
+export function removeField(search: string, fieldName: string): string {
+  let i = search.indexOf(fieldName + '=');
+  if (i < 0) {
+    return search;
+  }
+  if (i > 0) {
+    if (search.substring(i - 1, 1) != '&') {
+      i = search.indexOf('&' + fieldName + '=');
+      if (i < 0) {
+        return search;
+      }
+      i = i + 1;
+    }
+  }
+  const j = search.indexOf('&', i + fieldName.length);
+  return j >= 0 ? search.substring(0, i) + search.substring(j + 1) : search.substring(0, i - 1);
+}
+export function removePage(search: string): string {
+  search = removeField(search, resources.page);
+  search = removeField(search, resources.partial);
+  return search;
+}
+export function buildPageSearch(search: string): string {
+  const sr = removePage(search);
+  return sr.length == 0 ? sr : '&' + sr;
+}
+export function buildPageSearchFromUrl(url: string): string {
+  const search = getSearch(url);
+  return buildPageSearch(search);
+}
+export function removeSort(search: string): string {
+  search = removeField(search, resources.sort);
+  search = removeField(search, resources.partial);
+  return search;
+}
+export interface Sort {
+  field?: string;
+  type?: string;
+}
+export interface SortType {
+  url: string;
+  tag: string;
+}
+export interface SortMap {
+  [key: string]: SortType;
+}
+export function getSortString(field: string, sort: Sort): string {
+  if (field === sort.field) {
+    return sort.type === '-' ? field : '-' + field;
+  }
+  return field;
+}
+export function buildSort(s?: string): Sort {
+  if (!s || s.indexOf(',') >= 0) {
+    return {} as Sort;
+  }
+  if (s.startsWith('-')) {
+    return { field: s.substring(1), type: '-' };
   } else {
-    const p2 = partialTrue + '&';
-    const q2 = query.indexOf(p2);
-    if (q2 >= 0) {
-      query = query.substring(0, q1) + query.substring(q1 + partialTrue.length + 2);
-    }
-  }
-  const pageQuery = getPageQuery(query, page);
-  if (pageQuery.length == 0) {
-    return query;
-  } else {
-    const x = pageQuery + '&';
-    if (query.indexOf(x) >= 0) {
-      return query.replace(x, '');
-    }
-    const x2 = '&' + pageQuery;
-    if (query.indexOf(x2) >= 0) {
-      return query.replace(x2, '');
-    }
-    return query.replace(pageQuery, '');
+    return { field: s.startsWith('+') ? s.substring(1) : s, type: '+' };
   }
 }
-export function hasQuery(req: Request): boolean {
-  return req.url.indexOf('?') >= 0;
+export function buildSortFromRequest(req: Request): Sort {
+  const s = query(req, resources.sort);
+  return buildSort(s);
 }
-export function getQuery(url: string): string {
-  const i = url.indexOf('?');
-  return i < 0 ? '' : url.substring(i + 1);
+export function renderSort(field: string, sort: Sort): string {
+  if (field === sort.field) {
+    return sort.type === '-' ? "<i class='sort-down'></i>" : "<i class='sort-up'></i>";
+  }
+  return et;
 }
-export function buildPageQuery(query: string): string {
-  const qr = removePageQuery(query);
-  return qr.length == 0 ? qr : '&' + qr;
-}
-export function buildPageQueryFromUrl(url: string): string {
-  const query = getQuery(url);
-  return buildPageQuery(query);
+export function buildSortSearch(search: string, fields: string[], sort: Sort): SortMap {
+  search = removeSort(search);
+  let sorts: SortMap = {};
+  const prefix = search.length > 0 ? '?' + search + '&' : '?';
+  for (let i = 0; i < fields.length; i++) {
+    sorts[fields[i]] = {
+      url: prefix + resources.sort + '=' + getSortString(fields[i], sort),
+      tag: renderSort(fields[i], sort),
+    };
+  }
+  return sorts;
 }
 
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {
