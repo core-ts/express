@@ -40,14 +40,6 @@ export * from './search_func';
 export * from './SearchController';
 export * from './view';
 
-export function hasQuery(req: Request): boolean {
-  return req.url.indexOf('?') >= 0;
-}
-export function getQuery(url: string): string {
-  const i = url.indexOf('?');
-  return i < 0 ? '' : url.substring(i + 1);
-}
-
 export interface AccessConfig {
   origin?: string | string[];
   credentials?: string | string[];

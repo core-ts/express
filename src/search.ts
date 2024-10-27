@@ -99,9 +99,20 @@ export function removePageQuery(query: string, page?: string, partialIsTrue?: st
     return query.replace(pageQuery, '');
   }
 }
+export function hasQuery(req: Request): boolean {
+  return req.url.indexOf('?') >= 0;
+}
+export function getQuery(url: string): string {
+  const i = url.indexOf('?');
+  return i < 0 ? '' : url.substring(i + 1);
+}
 export function buildPageQuery(query: string): string {
   const qr = removePageQuery(query);
   return qr.length == 0 ? qr : '&' + qr;
+}
+export function buildPageQueryFromUrl(url: string): string {
+  const query = getQuery(url);
+  return buildPageQuery(query);
 }
 
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {
