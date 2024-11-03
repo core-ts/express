@@ -6,6 +6,9 @@ import { resources } from './resources';
 const et = '';
 
 export interface Filter {
+  page?: number;
+  limit?: number;
+
   fields?: string[];
   sort?: string;
 
@@ -169,6 +172,53 @@ export function buildSortSearch(search: string, fields: string[], sort: Sort): S
     };
   }
   return sorts;
+}
+export function clone(obj: any): any {
+  if (!obj) {
+    return obj;
+  }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  if (typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    const arr = [];
+    for (const sub of obj) {
+      const c = clone(sub);
+      arr.push(c);
+    }
+    return arr;
+  }
+  const x: any = {};
+  const keys = Object.keys(obj);
+  for (const k of keys) {
+    const v = obj[k];
+    if (v instanceof Date) {
+      x[k] = new Date(v.getTime());
+    } else {
+      switch (typeof v) {
+        case 'object':
+          x[k] = clone(v);
+          break;
+        default:
+          x[k] = v;
+          break;
+      }
+    }
+  }
+  return x;
+}
+export function cloneFilter<F extends Filter>(obj: F, page: number, limit: number): F {
+  const f = clone(obj);
+  if (!obj.hasOwnProperty(resources.page)) {
+    (obj as any)[resources.page] = page;
+  }
+  if (!obj.hasOwnProperty(resources.limit)) {
+    (obj as any)[resources.limit] = limit;
+  }
+  return f;
 }
 
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {

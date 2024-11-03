@@ -4,9 +4,15 @@ import * as http from 'http';
 import * as https from 'https';
 import { Attributes, ErrorMessage } from './metadata';
 
+export interface StringMap {
+  [key: string]: string;
+}
 // tslint:disable-next-line:class-name
 export class resources {
+  static pageSizes = [12, 24, 60, 100, 120, 180, 300, 600];
   static page = 'page';
+  static limit = 'limit';
+  static defaultLimit = 12;
   static sort = 'sort';
   static partial = 'partial';
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>;
@@ -15,7 +21,7 @@ export class resources {
 }
 
 export interface Validator<T> {
-  validate(obj: T, patch?: boolean): Promise<ErrorMessage[]>;
+  validate(obj: T, patch?: boolean, resource?: StringMap): Promise<ErrorMessage[]>;
 }
 
 // tslint:disable-next-line:max-classes-per-file
