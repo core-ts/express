@@ -10,7 +10,7 @@ export interface StringMap {
 // tslint:disable-next-line:class-name
 export class resources {
   static limits = [12, 24, 60, 100, 120, 180, 300, 600];
-  static component = 'page';
+  static pages = 'pages';
   static page = 'page';
   static limit = 'limit';
   static defaultLimit = 12;
@@ -22,7 +22,7 @@ export class resources {
 }
 export function getView(req: Request, view: string): string {
   const partial = req.query[resources.partial];
-  return partial == 'true' ? resources.component + '/' + view : view;
+  return partial == 'true' ? resources.pages + '/' + view : view;
 }
 
 export interface Validator<T> {
