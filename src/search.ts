@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { minimizeArray, query } from './http';
+import { ViewService } from './LoadController';
 import { Attribute, Attributes } from './metadata';
 import { resources } from './resources';
 
@@ -404,10 +405,10 @@ const setKey = (_object: any, _isArrayKey: boolean, _key: string, _nextValue: an
 };
 export interface Limit {
   limit?: number;
-  offset?: number;
+  page?: number;
   nextPageToken?: string;
   fields?: string[];
-  offsetOrNextPageToken?: string | number;
+  pageOrNextPageToken?: string | number;
 }
 export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
   const o: any = obj;
@@ -432,16 +433,18 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
       const ipageSize = Math.floor(parseFloat(pageSize));
       if (ipageSize > 0) {
         r.limit = ipageSize;
+        /*
         const skip = o['skip'];
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
-            r.offset = iskip;
-            r.offsetOrNextPageToken = r.offset;
+            r.page = iskip;
+            r.pageOrNextPageToken = r.page;
             deletePageInfo(o);
             return r;
           }
         }
+        */
         let pageIndex = o['page'];
         if (!pageIndex) {
           pageIndex = o['pageIndex'];
@@ -454,6 +457,7 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (ipageIndex < 1) {
             ipageIndex = 1;
           }
+          /*
           let firstPageSize = o['firstLimit'];
           if (!firstPageSize) {
             firstPageSize = o['firstPageSize'];
@@ -464,27 +468,28 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
-              r.offset = ipageSize * (ipageIndex - 2) + ifirstPageSize;
-              r.offsetOrNextPageToken = r.offset;
+              r.page = ipageIndex;
+              r.pageOrNextPageToken = r.page;
               deletePageInfo(o);
               return r;
             }
           }
-          r.offset = ipageSize * (ipageIndex - 1);
-          r.offsetOrNextPageToken = r.offset;
+            */
+          r.page = ipageIndex;
+          r.pageOrNextPageToken = r.page;
           deletePageInfo(o);
           return r;
         }
-        r.offset = 0;
+        r.page = 1;
         if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.offsetOrNextPageToken = r.nextPageToken;
+          r.pageOrNextPageToken = r.nextPageToken;
         }
         deletePageInfo(o);
         return r;
       }
     }
     if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.offsetOrNextPageToken = r.nextPageToken;
+      r.pageOrNextPageToken = r.nextPageToken;
     }
     deletePageInfo(o);
     return r;
@@ -524,8 +529,8 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
         if (skip && !isNaN(skip)) {
           const iskip = Math.floor(parseFloat(skip));
           if (iskip >= 0) {
-            r.offset = iskip;
-            r.offsetOrNextPageToken = r.offset;
+            r.page = iskip;
+            r.pageOrNextPageToken = r.page;
             deletePageInfo(o, arr);
             return r;
           }
@@ -548,27 +553,27 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           if (firstPageSize && !isNaN(firstPageSize)) {
             const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
             if (ifirstPageSize > 0) {
-              r.offset = ipageSize * (ipageIndex - 2) + ifirstPageSize;
-              r.offsetOrNextPageToken = r.offset;
+              r.page = ipageSize * (ipageIndex - 2) + ifirstPageSize;
+              r.pageOrNextPageToken = r.page;
               deletePageInfo(o, arr);
               return r;
             }
           }
-          r.offset = ipageSize * (ipageIndex - 1);
-          r.offsetOrNextPageToken = r.offset;
+          r.page = ipageSize * (ipageIndex - 1);
+          r.pageOrNextPageToken = r.page;
           deletePageInfo(o, arr);
           return r;
         }
-        r.offset = 0;
+        r.page = 0;
         if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.offsetOrNextPageToken = r.nextPageToken;
+          r.pageOrNextPageToken = r.nextPageToken;
         }
         deletePageInfo(o, arr);
         return r;
       }
     }
     if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.offsetOrNextPageToken = r.nextPageToken;
+      r.pageOrNextPageToken = r.nextPageToken;
     }
     deletePageInfo(o, arr);
     return r;
@@ -790,4 +795,27 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
     }
   }
   return o;
+}
+export function getMetadataFunc<T, ID>(
+  viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
+  dates?: string[],
+  numbers?: string[],
+  keys?: Attributes | Attribute[] | string[],
+): Metadata | undefined {
+  const m: Metadata = { dates, numbers };
+  if ((m.dates && m.dates.length > 0) || (m.numbers && m.numbers.length > 0)) {
+    return m;
+  }
+  if (keys) {
+    if (!Array.isArray(keys)) {
+      return buildMetadata(keys);
+    }
+  }
+  if (typeof viewService !== 'function' && viewService.metadata) {
+    const metadata = viewService.metadata();
+    if (metadata) {
+      return buildMetadata(metadata);
+    }
+  }
+  return undefined;
 }

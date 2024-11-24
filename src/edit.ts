@@ -1,6 +1,6 @@
-import {Response} from 'express';
-import {handleError} from './http';
-import {Attribute, ErrorMessage} from './metadata';
+import { Response } from 'express';
+import { handleError } from './http';
+import { Attribute, ErrorMessage } from './metadata';
 /*
 export interface StatusConfig {
   duplicate_key: number|string;
@@ -32,7 +32,7 @@ export function initializeStatus(s?: StatusConfig): StatusConfig {
 }
 */
 export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
-  const n: string = (keys && keys.length === 1 && keys[0].name ? keys[0].name : 'id');
+  const n: string = keys && keys.length === 1 && keys[0].name ? keys[0].name : 'id';
   const o: any = obj;
   const i: any = id;
   if (!keys || keys.length === 1) {
@@ -62,37 +62,59 @@ export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   }
   return true;
 }
-export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
-  insert(obj).then(result => {
-    if (typeof result === 'number') {
-      if (result >= 1) {
-        res.status(201).json(returnNumber ? result : obj).end();
+export function create<T>(
+  res: Response,
+  obj: T,
+  insert: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>,
+  log: (msg: string, ctx?: any) => void,
+  returnNumber?: boolean,
+): void {
+  insert(obj)
+    .then((result) => {
+      if (typeof result === 'number') {
+        if (result >= 1) {
+          res
+            .status(201)
+            .json(returnNumber ? result : obj)
+            .end();
+        } else {
+          res.status(409).json(result).end();
+        }
+      } else if (Array.isArray(result)) {
+        res.status(422).json(result).end();
       } else {
-        res.status(409).json(result).end();
+        res.status(201).json(result).end();
       }
-    } else if (Array.isArray(result)) {
-      res.status(422).json(result).end();
-    } else {
-      res.status(201).json(result).end();
-    }
-  }).catch(err => handleError(err, res, log));
+    })
+    .catch((err) => handleError(err, res, log));
 }
-export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean): void {
-  save(obj).then(result => {
-    if (typeof result === 'number') {
-      if (result >= 1) {
-        res.status(200).json(returnNumber ? result : obj).end();
-      } else if (result === 0) {
-        res.status(404).json(result).end();
+export function update<T>(
+  res: Response,
+  obj: T,
+  save: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>,
+  log: (msg: string, ctx?: any) => void,
+  returnNumber?: boolean,
+): void {
+  save(obj)
+    .then((result) => {
+      if (typeof result === 'number') {
+        if (result >= 1) {
+          res
+            .status(200)
+            .json(returnNumber ? result : obj)
+            .end();
+        } else if (result === 0) {
+          res.status(404).json(result).end();
+        } else {
+          res.status(409).json(result).end();
+        }
+      } else if (Array.isArray(result)) {
+        res.status(422).json(result).end();
       } else {
-        res.status(409).json(result).end();
+        res.status(200).json(result).end();
       }
-    } else if (Array.isArray(result)) {
-      res.status(422).json(result).end();
-    } else {
-      res.status(200).json(result).end();
-    }
-  }).catch(err => handleError(err, res, log));
+    })
+    .catch((err) => handleError(err, res, log));
 }
 export function isTypeError(errs: ErrorMessage[]): boolean {
   if (!errs) {
@@ -100,7 +122,19 @@ export function isTypeError(errs: ErrorMessage[]): boolean {
   }
   for (const err of errs) {
     const c = err.code;
-    if (c === 'string' || c === 'number' || c === 'date' || c === 'boolean') {
+    if (
+      c === 'type' ||
+      c === 'string' ||
+      c === 'number' ||
+      c === 'date' ||
+      c === 'boolean' ||
+      c === 'strings' ||
+      c === 'numbers' ||
+      c === 'integers' ||
+      c === 'dates' ||
+      c === 'datetimes' ||
+      c === 'booleans'
+    ) {
       return true;
     }
   }

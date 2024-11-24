@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { Build, GenericController, GenericService } from './GenericController';
 import { handleError, Log } from './http';
 import { ErrorMessage } from './metadata';
-import { buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from './search';
-import { getMetadataFunc } from './search_func';
+import { StringMap } from './resources';
+import { buildArray, Filter, format, fromRequest, getMetadataFunc, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from './search';
 
 export interface Service<T, ID, R, S extends Filter> extends GenericService<T, ID, R> {
   search: (s: S, limit?: number, skip?: number | string, fields?: string[]) => Promise<SearchResult<T>>;
@@ -21,7 +21,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
     public lowCodeService: Service<T, ID, number | ErrorMessage[], S>,
     config?: SearchConfig,
     build?: Build<T>,
-    validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>,
+    validate?: (obj: T, resource?: StringMap, patch?: boolean) => Promise<ErrorMessage[]>,
     dates?: string[],
     numbers?: string[],
   ) {
@@ -47,7 +47,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);
     this.lowCodeService
-      .search(s2, l.limit, l.offsetOrNextPageToken, l.fields)
+      .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
       .catch((err) => handleError(err, res, this.log));
   }
@@ -65,7 +65,7 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
     log: Log,
     public lowCodeService: Service<T, ID, number | T | ErrorMessage[], S>,
     build?: Build<T>,
-    validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>,
+    validate?: (obj: T, resource?: StringMap, patch?: boolean) => Promise<ErrorMessage[]>,
     config?: SearchConfig,
     dates?: string[],
     numbers?: string[],
@@ -92,7 +92,7 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);
     this.lowCodeService
-      .search(s2, l.limit, l.offsetOrNextPageToken, l.fields)
+      .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
       .catch((err) => handleError(err, res, this.log));
   }

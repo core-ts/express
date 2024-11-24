@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { Build, GenericController, GenericService } from './GenericController';
 import { handleError, Log } from './http';
 import { ErrorMessage } from './metadata';
-import { buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from './search';
-import { getMetadataFunc } from './search_func';
+import { StringMap } from './resources';
+import { buildArray, Filter, format, fromRequest, getMetadataFunc, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from './search';
 
 export class GenericSearchController<T, ID, S extends Filter> extends GenericController<T, ID> {
   config?: SearchConfig;
@@ -19,7 +19,7 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
     service: GenericService<T, ID, number | ErrorMessage[]>,
     config?: SearchConfig,
     build?: Build<T>,
-    validate?: (obj: T, patch?: boolean) => Promise<ErrorMessage[]>,
+    validate?: (obj: T, resource?: StringMap, patch?: boolean) => Promise<ErrorMessage[]>,
     dates?: string[],
     numbers?: string[],
   ) {
@@ -44,7 +44,7 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
     const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding));
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);
-    this.find(s2, l.limit, l.offsetOrNextPageToken, l.fields)
+    this.find(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
       .catch((err) => handleError(err, res, this.log));
   }

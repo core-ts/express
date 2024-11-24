@@ -36,7 +36,7 @@ export class SearchController<T, S extends Filter> {
     const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding));
     const l = getParameters(s, this.config);
     const s2 = format(s, this.dates, this.numbers);
-    this.find(s2, l.limit, l.offsetOrNextPageToken, l.fields)
+    this.find(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
       .catch((err) => handleError(err, res, this.log));
   }

@@ -1,17 +1,17 @@
-import {Request, Response} from 'express';
-import {checkId, create, isTypeError, update} from './edit';
-import {handleError, Log} from './http';
-import {LoadController} from './LoadController';
-import {Attribute, Attributes, ErrorMessage} from './metadata';
-import {resources} from './resources';
-import {buildAndCheckId, buildId} from './view';
+import { Request, Response } from 'express';
+import { checkId, create, isTypeError, update } from './edit';
+import { handleError, Log } from './http';
+import { LoadController } from './LoadController';
+import { Attribute, Attributes, ErrorMessage } from './metadata';
+import { resources, StringMap } from './resources';
+import { buildAndCheckId, buildId } from './view';
 
 export type Build<T> = (res: Response, obj: T, isCreate?: boolean, isPatch?: boolean) => void;
-export type Validate<T> = (obj: T, patch?: boolean) => Promise<ErrorMessage[]>;
-export type Save<T> = (obj: T, ctx?: any) => Promise<number|T|ErrorMessage[]>;
+export type Validate<T> = (obj: T, resource?: StringMap, patch?: boolean) => Promise<ErrorMessage[]>;
+export type Save<T> = (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>;
 export interface GenericService<T, ID, R> {
-  metadata?(): Attributes|undefined;
-  load(id: ID, ctx?: any): Promise<T|null>;
+  metadata?(): Attributes | undefined;
+  load(id: ID, ctx?: any): Promise<T | null>;
   create(obj: T, ctx?: any): Promise<R>;
   update(obj: T, ctx?: any): Promise<R>;
   patch?(obj: Partial<T>, ctx?: any): Promise<R>;
@@ -20,7 +20,13 @@ export interface GenericService<T, ID, R> {
 export class GenericController<T, ID> extends LoadController<T, ID> {
   metadata?: Attributes;
   returnNumber?: boolean;
-  constructor(log: Log, public service: GenericService<T, ID, number|T|ErrorMessage[]>, public build?: Build<T>, public validate?: Validate<T>, returnNumber?: boolean) {
+  constructor(
+    log: Log,
+    public service: GenericService<T, ID, number | T | ErrorMessage[]>,
+    public build?: Build<T>,
+    public validate?: Validate<T>,
+    returnNumber?: boolean,
+  ) {
     super(log, service);
     this.returnNumber = returnNumber;
     if (service.metadata) {
@@ -44,13 +50,13 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
   update(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update);
     if (id) {
-      validateAndUpdate(res, req.body, false, this.service.update, this.log, this.validate, this.build);
+      validateAndUpdate(res, req.body, false, this.service.update, this.log, this.validate, undefined, this.build);
     }
   }
   patch(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.patch);
     if (id && this.service.patch) {
-      validateAndUpdate(res, req.body, true, this.service.patch, this.log, this.validate, this.build);
+      validateAndUpdate(res, req.body, true, this.service.patch, this.log, this.validate, undefined, this.build);
     }
   }
   delete(req: Request, res: Response): void {
@@ -59,46 +65,71 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
       if (!this.service.delete) {
         res.status(405).end('Method Not Allowed');
       } else {
-        this.service.delete(id).then(count => {
-          res.status(getDeleteStatus(count)).json(count).end();
-        }).catch(err => handleError(err, res, this.log));
+        this.service
+          .delete(id)
+          .then((count) => {
+            res.status(getDeleteStatus(count)).json(count).end();
+          })
+          .catch((err) => handleError(err, res, this.log));
       }
     }
   }
 }
-export function validateAndCreate<T>(req: Request, res: Response, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>, returnNumber?: boolean): void {
+export function validateAndCreate<T>(
+  req: Request,
+  res: Response,
+  save: Save<T>,
+  log: Log,
+  validate?: Validate<T>,
+  build?: Build<T>,
+  returnNumber?: boolean,
+): void {
   const obj = req.body;
   if (!obj || obj === '') {
     res.status(400).end('The request body cannot be empty.');
   } else {
     if (validate) {
-      validate(obj).then(errors => {
-        if (errors && errors.length > 0) {
-          res.status(getStatusCode(errors)).json(errors).end();
-        } else {
-          if (build) {
-            build(res, obj, true);
+      validate(obj)
+        .then((errors) => {
+          if (errors && errors.length > 0) {
+            res.status(getStatusCode(errors)).json(errors).end();
+          } else {
+            if (build) {
+              build(res, obj, true);
+            }
+            create(res, obj, save, log, returnNumber);
           }
-          create(res, obj, save, log, returnNumber);
-        }
-      }).catch(err => handleError(err, res, log));
+        })
+        .catch((err) => handleError(err, res, log));
     } else {
       create(res, obj, save, log, returnNumber);
     }
   }
 }
-export function validateAndUpdate<T>(res: Response, obj: T, isPatch: boolean, save: Save<T>, log: Log, validate?: Validate<T>, build?: Build<T>, returnNumber?: boolean):  void {
+export function validateAndUpdate<T>(
+  res: Response,
+  obj: T,
+  isPatch: boolean,
+  save: Save<T>,
+  log: Log,
+  validate?: Validate<T>,
+  resource?: StringMap,
+  build?: Build<T>,
+  returnNumber?: boolean,
+): void {
   if (validate) {
-    validate(obj, isPatch).then(errors => {
-      if (errors && errors.length > 0) {
-        res.status(getStatusCode(errors)).json(errors).end();
-      } else {
-        if (build) {
-          build(res, obj, false, isPatch);
+    validate(obj, resource, isPatch)
+      .then((errors) => {
+        if (errors && errors.length > 0) {
+          res.status(getStatusCode(errors)).json(errors).end();
+        } else {
+          if (build) {
+            build(res, obj, false, isPatch);
+          }
+          update(res, obj, save, log, returnNumber);
         }
-        update(res, obj, save, log, returnNumber);
-      }
-    }).catch(err => handleError(err, res, log));
+      })
+      .catch((err) => handleError(err, res, log));
   } else {
     update(res, obj, save, log, returnNumber);
   }
@@ -135,7 +166,7 @@ export function getDeleteStatus(count: number): number {
   }
 }
 export function getStatusCode(errs: ErrorMessage[]): number {
-  return (isTypeError(errs) ? 400 : 422);
+  return isTypeError(errs) ? 400 : 422;
 }
 export interface ModelConfig {
   id?: string;
@@ -147,13 +178,33 @@ export interface ModelConfig {
   createdAt?: string;
   version?: string;
 }
-export function useBuild<T>(c: ModelConfig, generate?: (() => string)): Build<T> {
-  const b = new Builder<T>(generate, c.id ? c.id : '', c.payload ? c.payload : '', c.user ? c.user : '', c.updatedBy ? c.updatedBy : '', c.updatedAt ? c.updatedAt : '', c.createdBy ? c.createdBy : '', c.createdAt ? c.createdAt : '', c.version ? c.version : '');
+export function useBuild<T>(c: ModelConfig, generate?: () => string): Build<T> {
+  const b = new Builder<T>(
+    generate,
+    c.id ? c.id : '',
+    c.payload ? c.payload : '',
+    c.user ? c.user : '',
+    c.updatedBy ? c.updatedBy : '',
+    c.updatedAt ? c.updatedAt : '',
+    c.createdBy ? c.createdBy : '',
+    c.createdAt ? c.createdAt : '',
+    c.version ? c.version : '',
+  );
   return b.build;
 }
 // tslint:disable-next-line:max-classes-per-file
 export class Builder<T> {
-  constructor(public generate: (() => string)|undefined, public id: string, public payload: string, public user: string, public updatedBy: string, public updatedAt: string, public createdBy: string, public createdAt: string, public version: string) {
+  constructor(
+    public generate: (() => string) | undefined,
+    public id: string,
+    public payload: string,
+    public user: string,
+    public updatedBy: string,
+    public updatedAt: string,
+    public createdBy: string,
+    public createdAt: string,
+    public version: string,
+  ) {
     this.build = this.build.bind(this);
   }
   build(res: Response, obj: T, isCreate?: boolean, isPatch?: boolean): void {

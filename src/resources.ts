@@ -9,7 +9,8 @@ export interface StringMap {
 }
 // tslint:disable-next-line:class-name
 export class resources {
-  static pageSizes = [12, 24, 60, 100, 120, 180, 300, 600];
+  static limits = [12, 24, 60, 100, 120, 180, 300, 600];
+  static component = 'page';
   static page = 'page';
   static limit = 'limit';
   static defaultLimit = 12;
@@ -19,9 +20,13 @@ export class resources {
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[];
   static encoding?: BufferEncoding = 'utf-8';
 }
+export function getView(req: Request, view: string): string {
+  const partial = req.query[resources.partial];
+  return partial == 'true' ? resources.component + '/' + view : view;
+}
 
 export interface Validator<T> {
-  validate(obj: T, patch?: boolean, resource?: StringMap): Promise<ErrorMessage[]>;
+  validate(obj: T, resource?: StringMap, patch?: boolean): Promise<ErrorMessage[]>;
 }
 
 // tslint:disable-next-line:max-classes-per-file

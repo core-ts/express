@@ -36,7 +36,6 @@ export * from './LowCodeController';
 export * from './metadata';
 export * from './resources';
 export * from './search';
-export * from './search_func';
 export * from './SearchController';
 export * from './view';
 
@@ -291,3 +290,8 @@ export class UserReactionController {
 }
 export const ReactController = UserReactionController;
 export const ReactionController = UserReactionController;
+export function addDays(d: Date, n: number): Date {
+  const newDate = new Date(d);
+  newDate.setDate(newDate.getDate() + n);
+  return newDate;
+}
