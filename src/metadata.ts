@@ -9,8 +9,9 @@ export type FormatType = Format;
 export interface ErrorMessage {
   field: string;
   code: string;
-  param?: string|number|Date;
   message?: string;
+  param?: string|number|Date;
+  invalid?: string;
 }
 
 export interface Model {
