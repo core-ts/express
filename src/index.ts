@@ -13,32 +13,32 @@ import { SearchController } from './SearchController';
 export { HealthController as HealthHandler, LoadController as LoadHandler, LogController as LogHandler, LoadController as ViewHandler };
 // export {LoadController as ViewController};
 
-  export {
-    GenericController as GenericHandler,
-    GenericSearchController as GenericSearchHandler,
-    Controller as Handler,
-    LoadSearchController as LoadSearchHandler,
-    Service as LowCodeService,
-    SearchController as SearchHandler
-  };
+export {
+  GenericController as GenericHandler,
+  GenericSearchController as GenericSearchHandler,
+  Controller as Handler,
+  LoadSearchController as LoadSearchHandler,
+  Service as LowCodeService,
+  SearchController as SearchHandler,
+};
 
-  export * from './client';
-  export * from './edit';
-  export * from './GenericController';
-  export * from './GenericSearchController';
-  export * from './health';
-  export * from './HealthController';
-  export * from './http';
-  export * from './LoadController';
-  export * from './LoadSearchController';
-  export * from './log';
-  export * from './LogController';
-  export * from './LowCodeController';
-  export * from './metadata';
-  export * from './resources';
-  export * from './search';
-  export * from './SearchController';
-  export * from './view';
+export * from './client';
+export * from './edit';
+export * from './GenericController';
+export * from './GenericSearchController';
+export * from './health';
+export * from './HealthController';
+export * from './http';
+export * from './LoadController';
+export * from './LoadSearchController';
+export * from './log';
+export * from './LogController';
+export * from './LowCodeController';
+export * from './metadata';
+export * from './resources';
+export * from './search';
+export * from './SearchController';
+export * from './view';
 
 export interface AccessConfig {
   origin?: string | string[];
@@ -292,6 +292,16 @@ export class UserReactionController {
 export const ReactController = UserReactionController;
 export const ReactionController = UserReactionController;
 
+export function checked(s: string[] | string | undefined, v: string): boolean | undefined {
+  if (s) {
+    if (Array.isArray(s)) {
+      return s.includes(v);
+    } else {
+      return s === v;
+    }
+  }
+  return false;
+}
 export function addSeconds(date: Date, number: number): Date {
   const d = new Date(date);
   d.setSeconds(d.getSeconds() + number);
@@ -308,16 +318,16 @@ export function addDays(d: Date, n: number): Date {
   return newDate;
 }
 export interface ErrorMap {
-  [key: string]: ErrorMessage
+  [key: string]: ErrorMessage;
 }
 export function toMap(errors: ErrorMessage[]): ErrorMap {
-  const errorMap: ErrorMap = {}
+  const errorMap: ErrorMap = {};
   if (!errors) {
-    return errorMap
+    return errorMap;
   }
   for (let i = 0; i < errors.length; i++) {
-    errors[i].invalid = "invalid"
-    errorMap[errors[i].field] = errors[i]
+    errors[i].invalid = 'invalid';
+    errorMap[errors[i].field] = errors[i];
   }
-  return errorMap
+  return errorMap;
 }
