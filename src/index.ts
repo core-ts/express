@@ -348,7 +348,7 @@ function escapeHtml(input: string): string {
 
 const s = 'string';
 const o = 'object';
-function escapeHTML(obj: any): any {
+export function escapeHTML(obj: any): any {
   if (!obj || typeof obj !== s) {
     return obj;
   }
