@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { minimizeArray, query } from './http';
 import { ViewService } from './LoadController';
 import { Attribute, Attributes } from './metadata';
-import { resources } from './resources';
+import { resources, StringMap } from './resources';
 
 const et = '';
 
@@ -52,6 +52,44 @@ export function getPageTotal(pageSize?: number, total?: number): number {
       return Math.floor(total / pageSize);
     }
     return Math.floor(total / pageSize + 1);
+  }
+}
+export function formatText(...args: any[]): string {
+  let formatted = args[0];
+  if (!formatted || formatted === '') {
+    return '';
+  }
+  if (args.length > 1 && Array.isArray(args[1])) {
+    const params = args[1];
+    for (let i = 0; i < params.length; i++) {
+      const regexp = new RegExp('\\{' + i + '\\}', 'gi');
+      formatted = formatted.replace(regexp, params[i]);
+    }
+  } else {
+    for (let i = 1; i < args.length; i++) {
+      const regexp = new RegExp('\\{' + (i - 1) + '\\}', 'gi');
+      formatted = formatted.replace(regexp, args[i]);
+    }
+  }
+  return formatted;
+}
+export function buildMessage<T>(resource: StringMap, results: T[], limit: number, page: number | undefined, total?: number): string {
+  if (!results || results.length === 0) {
+    return resource.msg_no_data_found;
+  } else {
+    if (!page) {
+      page = 1;
+    }
+    const fromIndex = (page - 1) * limit + 1;
+    const toIndex = fromIndex + results.length - 1;
+    const pageTotal = getPageTotal(limit, total);
+    if (pageTotal > 1) {
+      const msg2 = formatText(resource.msg_search_result_page_sequence, fromIndex, toIndex, total, page, pageTotal);
+      return msg2;
+    } else {
+      const msg3 = formatText(resource.msg_search_result_sequence, fromIndex, toIndex);
+      return msg3;
+    }
   }
 }
 export function buildPages(pageSize?: number, total?: number): number[] {
@@ -162,7 +200,8 @@ export function renderSort(field: string, sort: Sort): string {
   }
   return et;
 }
-export function buildSortSearch(search: string, fields: string[], sort: Sort): SortMap {
+export function buildSortSearch(search: string, fields: string[], sortStr?: string): SortMap {
+  const sort = buildSort(sortStr);
   search = removeSort(search);
   let sorts: SortMap = {};
   const prefix = search.length > 0 ? '?' + search + '&' : '?';
