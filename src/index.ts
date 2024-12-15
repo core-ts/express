@@ -340,7 +340,7 @@ const map: StringMap = {
   "'": '&#39;',
   '`': '&#96;',
 };
-function escapeHtml(input: string): string {
+function escapeHTML(input: string): string {
   return input.replace(/[&<>"'`]/g, function (char) {
     return map[char];
   });
@@ -348,7 +348,7 @@ function escapeHtml(input: string): string {
 
 const s = 'string';
 const o = 'object';
-export function escapeHTML(obj: any): any {
+export function escape(obj: any): any {
   if (!obj || typeof obj !== s) {
     return obj;
   }
@@ -356,16 +356,16 @@ export function escapeHTML(obj: any): any {
   for (const key of keys) {
     const v = obj[key];
     if (typeof v === s) {
-      obj[key] = escapeHtml(v);
+      obj[key] = escapeHTML(v);
     } else if (Array.isArray(v) && v.length > 0) {
       const v1 = v[0];
       if (typeof v1 === o && !(v1 instanceof Date)) {
         for (const item of v) {
-          escapeHTML(item);
+          escape(item);
         }
       }
     } else if (typeof v === o && !(v instanceof Date)) {
-      escapeHTML(obj[key]);
+      escape(obj[key]);
     }
   }
   return obj;
@@ -376,7 +376,7 @@ export function escapeArray<T>(arrs: T[]): T[] {
   }
   if (arrs.length > 0) {
     for (const obj of arrs) {
-      escapeHTML(obj);
+      escape(obj);
     }
   }
   return arrs;
