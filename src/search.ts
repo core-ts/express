@@ -250,7 +250,7 @@ export function clone(obj: any): any {
   }
   return x;
 }
-export function cloneFilter<F extends Filter>(obj: F, page: number, limit: number): F {
+export function cloneFilter<F extends Filter>(obj: F, limit: number, page: number): F {
   const f = clone(obj);
   if (!obj.hasOwnProperty(resources.page)) {
     (obj as any)[resources.page] = page;
