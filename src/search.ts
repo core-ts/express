@@ -36,6 +36,21 @@ export interface SearchResult<T> {
   last?: boolean;
 }
 
+export function queryPage<F extends Filter>(req: Request, filter?: F): number {
+  const field = req.query[resources.page];
+  const v = field ? field.toString() : undefined;
+  if (!v || v.length === 0) {
+    (filter as any)[resources.page] = 1;
+    return 1;
+  }
+  if (isNaN(v as any)) {
+    (filter as any)[resources.page] = 1;
+    return 1;
+  }
+  const n = parseFloat(v);
+  (filter as any)[resources.page] = n;
+  return n;
+}
 export function getOffset(limit: number, page: number): number {
   const offset = limit * (page - 1);
   return offset < 0 ? 0 : offset;
