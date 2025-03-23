@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { minimizeArray, query } from './http';
+import { minimizeArray, query, queryNumber } from './http';
 import { ViewService } from './LoadController';
 import { Attribute, Attributes } from './metadata';
 import { resources, StringMap } from './resources';
@@ -36,6 +36,9 @@ export interface SearchResult<T> {
   last?: boolean;
 }
 
+export function queryLimit(req: Request): number {
+  return queryNumber(req, resources.limit, resources.defaultLimit);
+}
 export function queryPage<F extends Filter>(req: Request, filter?: F): number {
   const field = req.query[resources.page];
   const v = field ? field.toString() : undefined;
