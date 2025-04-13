@@ -1,6 +1,6 @@
-import { Response } from 'express';
-import { handleError } from './http';
-import { Attribute, ErrorMessage } from './metadata';
+import { Response } from "express"
+import { handleError } from "./http"
+import { Attribute, ErrorMessage } from "./metadata"
 /*
 export interface StatusConfig {
   duplicate_key: number|string;
@@ -32,35 +32,35 @@ export function initializeStatus(s?: StatusConfig): StatusConfig {
 }
 */
 export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
-  const n: string = keys && keys.length === 1 && keys[0].name ? keys[0].name : 'id';
-  const o: any = obj;
-  const i: any = id;
+  const n: string = keys && keys.length === 1 && keys[0].name ? keys[0].name : "id"
+  const o: any = obj
+  const i: any = id
   if (!keys || keys.length === 1) {
-    const v = o[n];
+    const v = o[n]
     if (!v) {
-      o[n] = i;
-      return true;
+      o[n] = i
+      return true
     }
     // tslint:disable-next-line:triple-equals
     if (v != i) {
-      return false;
+      return false
     }
-    return true;
+    return true
   }
-  const ks = Object.keys(i);
+  const ks = Object.keys(i)
   for (const k of ks) {
-    const v = o[k];
+    const v = o[k]
     if (!v) {
-      o[k] = i[k];
+      o[k] = i[k]
     } else {
       // tslint:disable-next-line:triple-equals
       if (v != i[k]) {
-        return false;
+        return false
       }
     }
-    o[k] = i[k];
+    o[k] = i[k]
   }
-  return true;
+  return true
 }
 export function create<T>(
   res: Response,
@@ -71,22 +71,22 @@ export function create<T>(
 ): void {
   insert(obj)
     .then((result) => {
-      if (typeof result === 'number') {
+      if (typeof result === "number") {
         if (result >= 1) {
           res
             .status(201)
             .json(returnNumber ? result : obj)
-            .end();
+            .end()
         } else {
-          res.status(409).json(result).end();
+          res.status(409).json(result).end()
         }
       } else if (Array.isArray(result)) {
-        res.status(422).json(result).end();
+        res.status(422).json(result).end()
       } else {
-        res.status(201).json(result).end();
+        res.status(201).json(result).end()
       }
     })
-    .catch((err) => handleError(err, res, log));
+    .catch((err) => handleError(err, res, log))
 }
 export function update<T>(
   res: Response,
@@ -97,46 +97,46 @@ export function update<T>(
 ): void {
   save(obj)
     .then((result) => {
-      if (typeof result === 'number') {
+      if (typeof result === "number") {
         if (result >= 1) {
           res
             .status(200)
             .json(returnNumber ? result : obj)
-            .end();
+            .end()
         } else if (result === 0) {
-          res.status(404).json(result).end();
+          res.status(404).json(result).end()
         } else {
-          res.status(409).json(result).end();
+          res.status(409).json(result).end()
         }
       } else if (Array.isArray(result)) {
-        res.status(422).json(result).end();
+        res.status(422).json(result).end()
       } else {
-        res.status(200).json(result).end();
+        res.status(200).json(result).end()
       }
     })
-    .catch((err) => handleError(err, res, log));
+    .catch((err) => handleError(err, res, log))
 }
 export function isTypeError(errs: ErrorMessage[]): boolean {
   if (!errs) {
-    return false;
+    return false
   }
   for (const err of errs) {
-    const c = err.code;
+    const c = err.code
     if (
-      c === 'type' ||
-      c === 'string' ||
-      c === 'number' ||
-      c === 'date' ||
-      c === 'boolean' ||
-      c === 'strings' ||
-      c === 'numbers' ||
-      c === 'integers' ||
-      c === 'dates' ||
-      c === 'datetimes' ||
-      c === 'booleans'
+      c === "type" ||
+      c === "string" ||
+      c === "number" ||
+      c === "date" ||
+      c === "boolean" ||
+      c === "strings" ||
+      c === "numbers" ||
+      c === "integers" ||
+      c === "dates" ||
+      c === "datetimes" ||
+      c === "booleans"
     ) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }

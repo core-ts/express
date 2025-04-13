@@ -1,313 +1,313 @@
-import { Request, Response } from 'express';
-import { minimizeArray, query, queryNumber } from './http';
-import { ViewService } from './LoadController';
-import { Attribute, Attributes } from './metadata';
-import { resources, StringMap } from './resources';
+import { Request, Response } from "express"
+import { minimizeArray, query, queryNumber } from "./http"
+import { ViewService } from "./LoadController"
+import { Attribute, Attributes } from "./metadata"
+import { resources, StringMap } from "./resources"
 
-const et = '';
+const et = ""
 
 export interface Filter {
-  page?: number;
-  limit?: number;
+  page?: number
+  limit?: number
 
-  fields?: string[];
-  sort?: string;
+  fields?: string[]
+  sort?: string
 
-  q?: string;
+  q?: string
 }
 export interface SearchConfig {
-  excluding?: string;
-  fields?: string;
-  list?: string;
-  total?: string;
-  token?: string;
-  last?: string;
-  csv?: boolean;
-  page?: string;
-  limit?: string;
-  skip?: string;
-  refId?: string;
-  firstLimit?: string;
+  excluding?: string
+  fields?: string
+  list?: string
+  total?: string
+  token?: string
+  last?: string
+  csv?: boolean
+  page?: string
+  limit?: string
+  skip?: string
+  refId?: string
+  firstLimit?: string
 }
 export interface SearchResult<T> {
-  list: T[];
-  total?: number;
-  nextPageToken?: string;
-  last?: boolean;
+  list: T[]
+  total?: number
+  nextPageToken?: string
+  last?: boolean
 }
 
 export function queryLimit(req: Request): number {
-  return queryNumber(req, resources.limit, resources.defaultLimit);
+  return queryNumber(req, resources.limit, resources.defaultLimit)
 }
 export function queryPage<F extends Filter>(req: Request, filter?: F): number {
-  const field = req.query[resources.page];
-  const v = field ? field.toString() : undefined;
+  const field = req.query[resources.page]
+  const v = field ? field.toString() : undefined
   if (!v || v.length === 0) {
-    (filter as any)[resources.page] = 1;
-    return 1;
+    ;(filter as any)[resources.page] = 1
+    return 1
   }
   if (isNaN(v as any)) {
-    (filter as any)[resources.page] = 1;
-    return 1;
+    ;(filter as any)[resources.page] = 1
+    return 1
   }
-  const n = parseFloat(v);
-  (filter as any)[resources.page] = n;
-  return n;
+  const n = parseFloat(v)
+  ;(filter as any)[resources.page] = n
+  return n
 }
 export function getOffset(limit: number, page: number): number {
-  const offset = limit * (page - 1);
-  return offset < 0 ? 0 : offset;
+  const offset = limit * (page - 1)
+  return offset < 0 ? 0 : offset
 }
 
 export function getPageTotal(pageSize?: number, total?: number): number {
   if (!pageSize || pageSize <= 0) {
-    return 1;
+    return 1
   } else {
     if (!total) {
-      total = 0;
+      total = 0
     }
     if (total % pageSize === 0) {
-      return Math.floor(total / pageSize);
+      return Math.floor(total / pageSize)
     }
-    return Math.floor(total / pageSize + 1);
+    return Math.floor(total / pageSize + 1)
   }
 }
 export function formatText(...args: any[]): string {
-  let formatted = args[0];
-  if (!formatted || formatted === '') {
-    return '';
+  let formatted = args[0]
+  if (!formatted || formatted === "") {
+    return ""
   }
   if (args.length > 1 && Array.isArray(args[1])) {
-    const params = args[1];
+    const params = args[1]
     for (let i = 0; i < params.length; i++) {
-      const regexp = new RegExp('\\{' + i + '\\}', 'gi');
-      formatted = formatted.replace(regexp, params[i]);
+      const regexp = new RegExp("\\{" + i + "\\}", "gi")
+      formatted = formatted.replace(regexp, params[i])
     }
   } else {
     for (let i = 1; i < args.length; i++) {
-      const regexp = new RegExp('\\{' + (i - 1) + '\\}', 'gi');
-      formatted = formatted.replace(regexp, args[i]);
+      const regexp = new RegExp("\\{" + (i - 1) + "\\}", "gi")
+      formatted = formatted.replace(regexp, args[i])
     }
   }
-  return formatted;
+  return formatted
 }
 export function buildMessage<T>(resource: StringMap, results: T[], limit: number, page: number | undefined, total?: number): string {
   if (!results || results.length === 0) {
-    return resource.msg_no_data_found;
+    return resource.msg_no_data_found
   } else {
     if (!page) {
-      page = 1;
+      page = 1
     }
-    const fromIndex = (page - 1) * limit + 1;
-    const toIndex = fromIndex + results.length - 1;
-    const pageTotal = getPageTotal(limit, total);
+    const fromIndex = (page - 1) * limit + 1
+    const toIndex = fromIndex + results.length - 1
+    const pageTotal = getPageTotal(limit, total)
     if (pageTotal > 1) {
-      const msg2 = formatText(resource.msg_search_result_page_sequence, fromIndex, toIndex, total, page, pageTotal);
-      return msg2;
+      const msg2 = formatText(resource.msg_search_result_page_sequence, fromIndex, toIndex, total, page, pageTotal)
+      return msg2
     } else {
-      const msg3 = formatText(resource.msg_search_result_sequence, fromIndex, toIndex);
-      return msg3;
+      const msg3 = formatText(resource.msg_search_result_sequence, fromIndex, toIndex)
+      return msg3
     }
   }
 }
 export function buildPages(pageSize?: number, total?: number): number[] {
-  const pageTotal = getPageTotal(pageSize, total);
+  const pageTotal = getPageTotal(pageSize, total)
   if (pageTotal <= 1) {
-    return [1];
+    return [1]
   }
-  const arr: number[] = [];
+  const arr: number[] = []
   for (let i = 1; i <= pageTotal; i++) {
-    arr.push(i);
+    arr.push(i)
   }
-  return arr;
+  return arr
 }
 
 export function hasSearch(req: Request): boolean {
-  return req.url.indexOf('?') >= 0;
+  return req.url.indexOf("?") >= 0
 }
 export function getSearch(url: string): string {
-  const i = url.indexOf('?');
-  return i < 0 ? et : url.substring(i + 1);
+  const i = url.indexOf("?")
+  return i < 0 ? et : url.substring(i + 1)
 }
 export function getField(search: string, fieldName: string): string {
-  let i = search.indexOf(fieldName + '=');
+  let i = search.indexOf(fieldName + "=")
   if (i < 0) {
-    return '';
+    return ""
   }
   if (i > 0) {
-    if (search.substring(i - 1, 1) != '&') {
-      i = search.indexOf('&' + fieldName + '=');
+    if (search.substring(i - 1, 1) != "&") {
+      i = search.indexOf("&" + fieldName + "=")
       if (i < 0) {
-        return search;
+        return search
       }
-      i = i + 1;
+      i = i + 1
     }
   }
-  const j = search.indexOf('&', i + fieldName.length);
-  return j >= 0 ? search.substring(i, j) : search.substring(i);
+  const j = search.indexOf("&", i + fieldName.length)
+  return j >= 0 ? search.substring(i, j) : search.substring(i)
 }
 export function removeField(search: string, fieldName: string): string {
-  let i = search.indexOf(fieldName + '=');
+  let i = search.indexOf(fieldName + "=")
   if (i < 0) {
-    return search;
+    return search
   }
   if (i > 0) {
-    if (search.substring(i - 1, 1) != '&') {
-      i = search.indexOf('&' + fieldName + '=');
+    if (search.substring(i - 1, 1) != "&") {
+      i = search.indexOf("&" + fieldName + "=")
       if (i < 0) {
-        return search;
+        return search
       }
-      i = i + 1;
+      i = i + 1
     }
   }
-  const j = search.indexOf('&', i + fieldName.length);
-  return j >= 0 ? search.substring(0, i) + search.substring(j + 1) : search.substring(0, i - 1);
+  const j = search.indexOf("&", i + fieldName.length)
+  return j >= 0 ? search.substring(0, i) + search.substring(j + 1) : search.substring(0, i - 1)
 }
 export function removePage(search: string): string {
-  search = removeField(search, resources.page);
-  search = removeField(search, resources.partial);
-  return search;
+  search = removeField(search, resources.page)
+  search = removeField(search, resources.partial)
+  return search
 }
 export function buildPageSearch(search: string): string {
-  const sr = removePage(search);
-  return sr.length == 0 ? sr : '&' + sr;
+  const sr = removePage(search)
+  return sr.length == 0 ? sr : "&" + sr
 }
 export function buildPageSearchFromUrl(url: string): string {
-  const search = getSearch(url);
-  return buildPageSearch(search);
+  const search = getSearch(url)
+  return buildPageSearch(search)
 }
 export function removeSort(search: string): string {
-  search = removeField(search, resources.sort);
-  search = removeField(search, resources.partial);
-  return search;
+  search = removeField(search, resources.sort)
+  search = removeField(search, resources.partial)
+  return search
 }
 export interface Sort {
-  field?: string;
-  type?: string;
+  field?: string
+  type?: string
 }
 export interface SortType {
-  url: string;
-  tag: string;
+  url: string
+  tag: string
 }
 export interface SortMap {
-  [key: string]: SortType;
+  [key: string]: SortType
 }
 export function getSortString(field: string, sort: Sort): string {
   if (field === sort.field) {
-    return sort.type === '-' ? field : '-' + field;
+    return sort.type === "-" ? field : "-" + field
   }
-  return field;
+  return field
 }
 export function buildSort(s?: string): Sort {
-  if (!s || s.indexOf(',') >= 0) {
-    return {} as Sort;
+  if (!s || s.indexOf(",") >= 0) {
+    return {} as Sort
   }
-  if (s.startsWith('-')) {
-    return { field: s.substring(1), type: '-' };
+  if (s.startsWith("-")) {
+    return { field: s.substring(1), type: "-" }
   } else {
-    return { field: s.startsWith('+') ? s.substring(1) : s, type: '+' };
+    return { field: s.startsWith("+") ? s.substring(1) : s, type: "+" }
   }
 }
 export function buildSortFromRequest(req: Request): Sort {
-  const s = query(req, resources.sort);
-  return buildSort(s);
+  const s = query(req, resources.sort)
+  return buildSort(s)
 }
 export function renderSort(field: string, sort: Sort): string {
   if (field === sort.field) {
-    return sort.type === '-' ? "<i class='sort-down'></i>" : "<i class='sort-up'></i>";
+    return sort.type === "-" ? "<i class='sort-down'></i>" : "<i class='sort-up'></i>"
   }
-  return et;
+  return et
 }
 export function buildSortSearch(search: string, fields: string[], sortStr?: string): SortMap {
-  const sort = buildSort(sortStr);
-  search = removeSort(search);
-  let sorts: SortMap = {};
-  const prefix = search.length > 0 ? '?' + search + '&' : '?';
+  const sort = buildSort(sortStr)
+  search = removeSort(search)
+  let sorts: SortMap = {}
+  const prefix = search.length > 0 ? "?" + search + "&" : "?"
   for (let i = 0; i < fields.length; i++) {
     sorts[fields[i]] = {
-      url: prefix + resources.sort + '=' + getSortString(fields[i], sort),
+      url: prefix + resources.sort + "=" + getSortString(fields[i], sort),
       tag: renderSort(fields[i], sort),
-    };
+    }
   }
-  return sorts;
+  return sorts
 }
 export function clone(obj: any): any {
   if (!obj) {
-    return obj;
+    return obj
   }
   if (obj instanceof Date) {
-    return new Date(obj.getTime());
+    return new Date(obj.getTime())
   }
-  if (typeof obj !== 'object') {
-    return obj;
+  if (typeof obj !== "object") {
+    return obj
   }
   if (Array.isArray(obj)) {
-    const arr = [];
+    const arr = []
     for (const sub of obj) {
-      const c = clone(sub);
-      arr.push(c);
+      const c = clone(sub)
+      arr.push(c)
     }
-    return arr;
+    return arr
   }
-  const x: any = {};
-  const keys = Object.keys(obj);
+  const x: any = {}
+  const keys = Object.keys(obj)
   for (const k of keys) {
-    const v = obj[k];
+    const v = obj[k]
     if (v instanceof Date) {
-      x[k] = new Date(v.getTime());
+      x[k] = new Date(v.getTime())
     } else {
       switch (typeof v) {
-        case 'object':
-          x[k] = clone(v);
-          break;
+        case "object":
+          x[k] = clone(v)
+          break
         default:
-          x[k] = v;
-          break;
+          x[k] = v
+          break
       }
     }
   }
-  return x;
+  return x
 }
 export function cloneFilter<F extends Filter>(obj: F, limit: number, page: number): F {
-  const f = clone(obj);
+  const f = clone(obj)
   if (!obj.hasOwnProperty(resources.page)) {
-    (obj as any)[resources.page] = page;
+    ;(obj as any)[resources.page] = page
   }
   if (!obj.hasOwnProperty(resources.limit)) {
-    (obj as any)[resources.limit] = limit;
+    ;(obj as any)[resources.limit] = limit
   }
-  return f;
+  return f
 }
 
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {
   if (quick && fields && fields.length > 0) {
-    res.status(200).json(toCsv(fields, result)).end();
+    res.status(200).json(toCsv(fields, result)).end()
   } else {
-    res.status(200).json(buildResult(result, config)).end();
+    res.status(200).json(buildResult(result, config)).end()
   }
 }
 export function buildResult<T>(r: SearchResult<T>, conf?: SearchConfig): any {
   if (!conf) {
-    return r;
+    return r
   }
-  const x: any = {};
-  const li = conf.list ? conf.list : 'list';
-  x[li] = minimizeArray(r.list);
-  const to = conf.total ? conf.total : 'total';
-  x[to] = r.total;
+  const x: any = {}
+  const li = conf.list ? conf.list : "list"
+  x[li] = minimizeArray(r.list)
+  const to = conf.total ? conf.total : "total"
+  x[to] = r.total
   if (r.nextPageToken && r.nextPageToken.length > 0) {
-    const t = conf.token ? conf.token : 'token';
-    x[t] = r.nextPageToken;
+    const t = conf.token ? conf.token : "token"
+    x[t] = r.nextPageToken
   }
   if (r.last) {
-    const l = conf.last ? conf.last : 'last';
-    x[l] = r.last;
+    const l = conf.last ? conf.last : "last"
+    x[l] = r.last
   }
-  return x;
+  return x
 }
 export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined {
   if (!conf) {
-    return undefined;
+    return undefined
   }
   const c: SearchConfig = {
     excluding: conf.excluding,
@@ -322,63 +322,63 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
     skip: conf.skip,
     refId: conf.refId,
     firstLimit: conf.firstLimit,
-  };
+  }
   if (!c.excluding || c.excluding.length === 0) {
-    c.excluding = 'excluding';
+    c.excluding = "excluding"
   }
   if (!c.fields || c.fields.length === 0) {
-    c.fields = 'fields';
+    c.fields = "fields"
   }
   if (!c.list || c.list.length === 0) {
-    c.list = 'list';
+    c.list = "list"
   }
   if (!c.total || c.total.length === 0) {
-    c.total = 'total';
+    c.total = "total"
   }
   if (!c.last || c.last.length === 0) {
-    c.last = 'last';
+    c.last = "last"
   }
   if (!c.token || c.token.length === 0) {
-    c.token = 'nextPageToken';
+    c.token = "nextPageToken"
   }
   if (!c.page || c.page.length === 0) {
-    c.page = 'page';
+    c.page = "page"
   }
   if (!c.limit || c.limit.length === 0) {
-    c.limit = 'limit';
+    c.limit = "limit"
   }
   if (!c.skip || c.skip.length === 0) {
-    c.skip = 'skip';
+    c.skip = "skip"
   }
   if (!c.refId || c.refId.length === 0) {
-    c.refId = 'refId';
+    c.refId = "refId"
   }
   if (!c.firstLimit || c.firstLimit.length === 0) {
-    c.firstLimit = 'firstLimit';
+    c.firstLimit = "firstLimit"
   }
-  return c;
+  return c
 }
 export function fromRequest<S>(req: Request, arr?: string[]): S {
-  const s: any = req.method === 'GET' ? fromUrl(req, arr) : req.body;
-  return s;
+  const s: any = req.method === "GET" ? fromUrl(req, arr) : req.body
+  return s
 }
 export function buildArray(arr?: string[], s0?: string, s1?: string, s2?: string): string[] {
-  const r: string[] = [];
+  const r: string[] = []
   if (arr && arr.length > 0) {
     for (const a of arr) {
-      r.push(a);
+      r.push(a)
     }
   }
   if (s0 && s0.length > 0) {
-    r.push(s0);
+    r.push(s0)
   }
   if (s1 && s1.length > 0) {
-    r.push(s1);
+    r.push(s1)
   }
   if (s2 && s2.length > 0) {
-    r.push(s2);
+    r.push(s2)
   }
-  return r;
+  return r
 }
 export function fromUrl<S>(req: Request, arr?: string[]): S {
   /*
@@ -386,29 +386,29 @@ export function fromUrl<S>(req: Request, arr?: string[]): S {
     fields = 'fields';
   }
   */
-  const s: any = {};
-  const obj = req.query;
-  const keys = Object.keys(obj);
+  const s: any = {}
+  const obj = req.query
+  const keys = Object.keys(obj)
   for (const key of keys) {
     if (inArray(key, arr)) {
-      const x = (obj[key] as string).split(',');
-      setValue(s, key, x);
+      const x = (obj[key] as string).split(",")
+      setValue(s, key, x)
     } else {
-      setValue(s, key, obj[key] as string);
+      setValue(s, key, obj[key] as string)
     }
   }
-  return s;
+  return s
 }
 export function inArray(s: string, arr?: string[]): boolean {
   if (!arr || arr.length === 0) {
-    return false;
+    return false
   }
   for (const a of arr) {
     if (s === a) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 /*
 export function setValue<T>(obj: T, path: string, value: string): void {
@@ -430,66 +430,66 @@ export function setValue<T>(obj: T, path: string, value: string): void {
 }
 */
 export function setValue<T, V>(o: T, key: string, value: V): any {
-  const obj: any = o;
-  let replaceKey = key.replace(/\[/g, '.[').replace(/\.\./g, '.');
-  if (replaceKey.indexOf('.') === 0) {
-    replaceKey = replaceKey.slice(1, replaceKey.length);
+  const obj: any = o
+  let replaceKey = key.replace(/\[/g, ".[").replace(/\.\./g, ".")
+  if (replaceKey.indexOf(".") === 0) {
+    replaceKey = replaceKey.slice(1, replaceKey.length)
   }
-  const keys = replaceKey.split('.');
-  const firstKey = keys.shift();
+  const keys = replaceKey.split(".")
+  const firstKey = keys.shift()
   if (!firstKey) {
-    return;
+    return
   }
-  const isArrayKey = /\[([0-9]+)\]/.test(firstKey);
+  const isArrayKey = /\[([0-9]+)\]/.test(firstKey)
   if (keys.length > 0) {
-    const firstKeyValue = obj[firstKey] || {};
-    const returnValue = setValue(firstKeyValue, keys.join('.'), value);
-    return setKey(obj, isArrayKey, firstKey, returnValue);
+    const firstKeyValue = obj[firstKey] || {}
+    const returnValue = setValue(firstKeyValue, keys.join("."), value)
+    return setKey(obj, isArrayKey, firstKey, returnValue)
   }
-  return setKey(obj, isArrayKey, firstKey, value);
+  return setKey(obj, isArrayKey, firstKey, value)
 }
 const setKey = (_object: any, _isArrayKey: boolean, _key: string, _nextValue: any) => {
   if (_isArrayKey) {
     if (_object.length > _key) {
-      _object[_key] = _nextValue;
+      _object[_key] = _nextValue
     } else {
-      _object.push(_nextValue);
+      _object.push(_nextValue)
     }
   } else {
-    _object[_key] = _nextValue;
+    _object[_key] = _nextValue
   }
-  return _object;
-};
+  return _object
+}
 export interface Limit {
-  limit?: number;
-  page?: number;
-  nextPageToken?: string;
-  fields?: string[];
-  pageOrNextPageToken?: string | number;
+  limit?: number
+  page?: number
+  nextPageToken?: string
+  fields?: string[]
+  pageOrNextPageToken?: string | number
 }
 export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
-  const o: any = obj;
+  const o: any = obj
   if (!config) {
-    const sfield = 'fields';
-    let fields;
-    const fs = o[sfield];
+    const sfield = "fields"
+    let fields
+    const fs = o[sfield]
     if (fs && Array.isArray(fs)) {
-      fields = fs;
-      delete o[sfield];
+      fields = fs
+      delete o[sfield]
     }
-    let refId = o['refId'];
+    let refId = o["refId"]
     if (!refId) {
-      refId = o['nextPageToken'];
+      refId = o["nextPageToken"]
     }
-    const r: Limit = { fields, nextPageToken: refId };
-    let pageSize = o['limit'];
+    const r: Limit = { fields, nextPageToken: refId }
+    let pageSize = o["limit"]
     if (!pageSize) {
-      pageSize = o['pageSize'];
+      pageSize = o["pageSize"]
     }
     if (pageSize && !isNaN(pageSize)) {
-      const ipageSize = Math.floor(parseFloat(pageSize));
+      const ipageSize = Math.floor(parseFloat(pageSize))
       if (ipageSize > 0) {
-        r.limit = ipageSize;
+        r.limit = ipageSize
         /*
         const skip = o['skip'];
         if (skip && !isNaN(skip)) {
@@ -502,17 +502,17 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
           }
         }
         */
-        let pageIndex = o['page'];
+        let pageIndex = o["page"]
         if (!pageIndex) {
-          pageIndex = o['pageIndex'];
+          pageIndex = o["pageIndex"]
           if (!pageIndex) {
-            pageIndex = o['pageNo'];
+            pageIndex = o["pageNo"]
           }
         }
         if (pageIndex && !isNaN(pageIndex)) {
-          let ipageIndex = Math.floor(parseFloat(pageIndex));
+          let ipageIndex = Math.floor(parseFloat(pageIndex))
           if (ipageIndex < 1) {
-            ipageIndex = 1;
+            ipageIndex = 1
           }
           /*
           let firstPageSize = o['firstLimit'];
@@ -532,274 +532,274 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
             }
           }
             */
-          r.page = ipageIndex;
-          r.pageOrNextPageToken = r.page;
-          deletePageInfo(o);
-          return r;
+          r.page = ipageIndex
+          r.pageOrNextPageToken = r.page
+          deletePageInfo(o)
+          return r
         }
-        r.page = 1;
+        r.page = 1
         if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.pageOrNextPageToken = r.nextPageToken;
+          r.pageOrNextPageToken = r.nextPageToken
         }
-        deletePageInfo(o);
-        return r;
+        deletePageInfo(o)
+        return r
       }
     }
     if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.pageOrNextPageToken = r.nextPageToken;
+      r.pageOrNextPageToken = r.nextPageToken
     }
-    deletePageInfo(o);
-    return r;
+    deletePageInfo(o)
+    return r
   } else {
-    let sfield = config.fields;
+    let sfield = config.fields
     if (!sfield || sfield.length === 0) {
-      sfield = 'fields';
+      sfield = "fields"
     }
-    let fields;
-    const fs = o[sfield];
+    let fields
+    const fs = o[sfield]
     if (fs && Array.isArray(fs)) {
-      fields = fs;
-      delete o[sfield];
+      fields = fs
+      delete o[sfield]
     }
-    let strRefId = config.refId;
+    let strRefId = config.refId
     if (!strRefId || strRefId.length === 0) {
-      strRefId = 'refId';
+      strRefId = "refId"
     }
-    const refId = o[strRefId];
-    const r: Limit = { fields, nextPageToken: refId };
+    const refId = o[strRefId]
+    const r: Limit = { fields, nextPageToken: refId }
 
-    let strLimit = config.limit;
+    let strLimit = config.limit
     if (!strLimit || strLimit.length === 0) {
-      strLimit = 'limit';
+      strLimit = "limit"
     }
-    const pageSize = o[strLimit];
-    const arr = [config.page, config.limit, config.skip, config.refId, config.firstLimit];
+    const pageSize = o[strLimit]
+    const arr = [config.page, config.limit, config.skip, config.refId, config.firstLimit]
     if (pageSize && !isNaN(pageSize)) {
-      const ipageSize = Math.floor(parseFloat(pageSize));
+      const ipageSize = Math.floor(parseFloat(pageSize))
       if (ipageSize > 0) {
-        r.limit = ipageSize;
-        let strSkip = config.skip;
+        r.limit = ipageSize
+        let strSkip = config.skip
         if (!strSkip || strSkip.length === 0) {
-          strSkip = 'skip';
+          strSkip = "skip"
         }
-        const skip = o[strSkip];
+        const skip = o[strSkip]
         if (skip && !isNaN(skip)) {
-          const iskip = Math.floor(parseFloat(skip));
+          const iskip = Math.floor(parseFloat(skip))
           if (iskip >= 0) {
-            r.page = iskip;
-            r.pageOrNextPageToken = r.page;
-            deletePageInfo(o, arr);
-            return r;
+            r.page = iskip
+            r.pageOrNextPageToken = r.page
+            deletePageInfo(o, arr)
+            return r
           }
         }
-        let strPage = config.page;
+        let strPage = config.page
         if (!strPage || strPage.length === 0) {
-          strPage = 'page';
+          strPage = "page"
         }
-        const pageIndex = o[strPage];
+        const pageIndex = o[strPage]
         if (pageIndex && !isNaN(pageIndex)) {
-          let ipageIndex = Math.floor(parseFloat(pageIndex));
+          let ipageIndex = Math.floor(parseFloat(pageIndex))
           if (ipageIndex < 1) {
-            ipageIndex = 1;
+            ipageIndex = 1
           }
-          let strFirstLimit = config.firstLimit;
+          let strFirstLimit = config.firstLimit
           if (!strFirstLimit || strFirstLimit.length === 0) {
-            strFirstLimit = 'firstLimit';
+            strFirstLimit = "firstLimit"
           }
-          const firstPageSize = o[strFirstLimit];
+          const firstPageSize = o[strFirstLimit]
           if (firstPageSize && !isNaN(firstPageSize)) {
-            const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
+            const ifirstPageSize = Math.floor(parseFloat(firstPageSize))
             if (ifirstPageSize > 0) {
-              r.page = ipageSize * (ipageIndex - 2) + ifirstPageSize;
-              r.pageOrNextPageToken = r.page;
-              deletePageInfo(o, arr);
-              return r;
+              r.page = ipageSize * (ipageIndex - 2) + ifirstPageSize
+              r.pageOrNextPageToken = r.page
+              deletePageInfo(o, arr)
+              return r
             }
           }
-          r.page = ipageSize * (ipageIndex - 1);
-          r.pageOrNextPageToken = r.page;
-          deletePageInfo(o, arr);
-          return r;
+          r.page = ipageSize * (ipageIndex - 1)
+          r.pageOrNextPageToken = r.page
+          deletePageInfo(o, arr)
+          return r
         }
-        r.page = 0;
+        r.page = 0
         if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.pageOrNextPageToken = r.nextPageToken;
+          r.pageOrNextPageToken = r.nextPageToken
         }
-        deletePageInfo(o, arr);
-        return r;
+        deletePageInfo(o, arr)
+        return r
       }
     }
     if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.pageOrNextPageToken = r.nextPageToken;
+      r.pageOrNextPageToken = r.nextPageToken
     }
-    deletePageInfo(o, arr);
-    return r;
+    deletePageInfo(o, arr)
+    return r
   }
 }
 // tslint:disable-next-line:array-type
 export function deletePageInfo(obj: any, arr?: Array<string | undefined>): void {
   if (!arr || arr.length === 0) {
-    delete obj['limit'];
-    delete obj['firstLimit'];
-    delete obj['skip'];
-    delete obj['page'];
-    delete obj['pageNo'];
-    delete obj['pageIndex'];
-    delete obj['pageSize'];
-    delete obj['initPageSize'];
-    delete obj['firstPageSize'];
-    delete obj['refId'];
-    delete obj['nextPageToken'];
+    delete obj["limit"]
+    delete obj["firstLimit"]
+    delete obj["skip"]
+    delete obj["page"]
+    delete obj["pageNo"]
+    delete obj["pageIndex"]
+    delete obj["pageSize"]
+    delete obj["initPageSize"]
+    delete obj["firstPageSize"]
+    delete obj["refId"]
+    delete obj["nextPageToken"]
   } else {
     for (const o of arr) {
       if (o && o.length > 0) {
-        delete obj[o];
+        delete obj[o]
       }
     }
   }
 }
-const re = /"/g;
+const re = /"/g
 export function toCsv<T>(fields: string[], r: SearchResult<T>): string {
   if (!r || r.list.length === 0) {
-    return '0';
+    return "0"
   } else {
-    const e = '';
-    const s = 'string';
-    const n = 'number';
-    const b = '""';
-    const rows: string[] = [];
-    rows.push('' + (r.total ? r.total : '') + ',' + (r.nextPageToken ? r.nextPageToken : '') + ',' + (r.last ? '1' : ''));
+    const e = ""
+    const s = "string"
+    const n = "number"
+    const b = '""'
+    const rows: string[] = []
+    rows.push("" + (r.total ? r.total : "") + "," + (r.nextPageToken ? r.nextPageToken : "") + "," + (r.last ? "1" : ""))
     for (const item of r.list) {
-      const cols: string[] = [];
+      const cols: string[] = []
       for (const name of fields) {
-        const v = (item as any)[name];
+        const v = (item as any)[name]
         if (!v) {
-          cols.push(e);
+          cols.push(e)
         } else {
           if (typeof v === s) {
-            if (s.indexOf(',') >= 0) {
-              cols.push('"' + v.replace(re, b) + '"');
+            if (s.indexOf(",") >= 0) {
+              cols.push('"' + v.replace(re, b) + '"')
             } else {
-              cols.push(v);
+              cols.push(v)
             }
           } else if (v instanceof Date) {
-            cols.push(v.toISOString());
+            cols.push(v.toISOString())
           } else if (typeof v === n) {
-            cols.push(v.toString());
+            cols.push(v.toString())
           } else {
-            cols.push('');
+            cols.push("")
           }
         }
       }
-      rows.push(cols.join(','));
+      rows.push(cols.join(","))
     }
-    return rows.join('\n');
+    return rows.join("\n")
   }
 }
 
 export interface DateRange {
-  startDate?: Date;
-  endDate?: Date;
-  startTime?: Date;
-  endTime?: Date;
-  min?: Date;
-  max?: Date;
-  upper?: Date;
+  startDate?: Date
+  endDate?: Date
+  startTime?: Date
+  endTime?: Date
+  min?: Date
+  max?: Date
+  upper?: Date
 }
 export interface NumberRange {
-  min?: number;
-  max?: number;
-  lower?: number;
-  upper?: number;
+  min?: number
+  max?: number
+  lower?: number
+  upper?: number
 }
 export interface Metadata {
-  dates?: string[];
-  numbers?: string[];
+  dates?: string[]
+  numbers?: string[]
 }
 export function buildMetadata(attributes: Attributes, includeDate?: boolean): Metadata {
-  const keys: string[] = Object.keys(attributes);
-  const dates: string[] = [];
-  const numbers: string[] = [];
+  const keys: string[] = Object.keys(attributes)
+  const dates: string[] = []
+  const numbers: string[] = []
   for (const key of keys) {
-    const attr: Attribute = attributes[key];
-    if (attr.type === 'number' || attr.type === 'integer') {
-      numbers.push(key);
-    } else if (attr.type === 'datetime' || (includeDate === true && attr.type === 'date')) {
-      dates.push(key);
+    const attr: Attribute = attributes[key]
+    if (attr.type === "number" || attr.type === "integer") {
+      numbers.push(key)
+    } else if (attr.type === "datetime" || (includeDate === true && attr.type === "date")) {
+      dates.push(key)
     }
   }
-  const m: Metadata = {};
+  const m: Metadata = {}
   if (dates.length > 0) {
-    m.dates = dates;
+    m.dates = dates
   }
   if (numbers.length > 0) {
-    m.numbers = numbers;
+    m.numbers = numbers
   }
-  return m;
+  return m
 }
 
-const _datereg = '/Date(';
-const _re = /-?\d+/;
+const _datereg = "/Date("
+const _re = /-?\d+/
 function toDate(v: any): Date | null | undefined {
   if (!v) {
-    return null;
+    return null
   }
   if (v instanceof Date) {
-    return v;
-  } else if (typeof v === 'number') {
-    return new Date(v);
+    return v
+  } else if (typeof v === "number") {
+    return new Date(v)
   }
-  const i = v.indexOf(_datereg);
+  const i = v.indexOf(_datereg)
   if (i >= 0) {
-    const m = _re.exec(v);
+    const m = _re.exec(v)
     if (m !== null) {
-      const d = parseInt(m[0], 10);
-      return new Date(d);
+      const d = parseInt(m[0], 10)
+      return new Date(d)
     } else {
-      return null;
+      return null
     }
   } else {
     if (isNaN(v)) {
-      return new Date(v);
+      return new Date(v)
     } else {
-      const d = parseInt(v, 10);
-      return new Date(d);
+      const d = parseInt(v, 10)
+      return new Date(d)
     }
   }
 }
 
 export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
-  const o: any = obj;
+  const o: any = obj
   if (dates && dates.length > 0) {
     for (const s of dates) {
-      const v = o[s];
+      const v = o[s]
       if (v) {
         if (v instanceof Date) {
-          continue;
+          continue
         }
-        if (typeof v === 'string' || typeof v === 'number') {
-          const d = toDate(v);
+        if (typeof v === "string" || typeof v === "number") {
+          const d = toDate(v)
           if (d) {
-            if (!(d instanceof Date) || d.toString() === 'Invalid Date') {
-              delete o[s];
+            if (!(d instanceof Date) || d.toString() === "Invalid Date") {
+              delete o[s]
             } else {
-              o[s] = d;
+              o[s] = d
             }
           }
-        } else if (typeof v === 'object') {
-          const keys = Object.keys(v);
+        } else if (typeof v === "object") {
+          const keys = Object.keys(v)
           for (const key of keys) {
-            const v2 = v[key];
+            const v2 = v[key]
             if (v2 instanceof Date) {
-              continue;
+              continue
             }
-            if (typeof v2 === 'string' || typeof v2 === 'number') {
-              const d2 = toDate(v2);
+            if (typeof v2 === "string" || typeof v2 === "number") {
+              const d2 = toDate(v2)
               if (d2) {
-                if (!(d2 instanceof Date) || d2.toString() === 'Invalid Date') {
-                  delete v[key];
+                if (!(d2 instanceof Date) || d2.toString() === "Invalid Date") {
+                  delete v[key]
                 } else {
-                  v[key] = d2;
+                  v[key] = d2
                 }
               }
             }
@@ -810,40 +810,40 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
   }
   if (nums && nums.length > 0) {
     for (const s of nums) {
-      const v = o[s];
+      const v = o[s]
       if (v) {
         if (v instanceof Date) {
-          delete o[s];
-          continue;
+          delete o[s]
+          continue
         }
-        if (typeof v === 'number') {
-          continue;
+        if (typeof v === "number") {
+          continue
         }
-        if (typeof v === 'string') {
+        if (typeof v === "string") {
           if (!isNaN(v as any)) {
-            delete o[s];
-            continue;
+            delete o[s]
+            continue
           } else {
-            const i = parseFloat(v);
-            o[s] = i;
+            const i = parseFloat(v)
+            o[s] = i
           }
-        } else if (typeof v === 'object') {
-          const keys = Object.keys(v);
+        } else if (typeof v === "object") {
+          const keys = Object.keys(v)
           for (const key of keys) {
-            const v2 = v[key];
+            const v2 = v[key]
             if (v2 instanceof Date) {
-              delete o[key];
-              continue;
+              delete o[key]
+              continue
             }
-            if (typeof v2 === 'number') {
-              continue;
+            if (typeof v2 === "number") {
+              continue
             }
-            if (typeof v2 === 'string') {
+            if (typeof v2 === "string") {
               if (!isNaN(v2 as any)) {
-                delete v[key];
+                delete v[key]
               } else {
-                const i = parseFloat(v2);
-                v[key] = i;
+                const i = parseFloat(v2)
+                v[key] = i
               }
             }
           }
@@ -851,7 +851,7 @@ export function format<T>(obj: T, dates?: string[], nums?: string[]): T {
       }
     }
   }
-  return o;
+  return o
 }
 export function getMetadataFunc<T, ID>(
   viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
@@ -859,20 +859,20 @@ export function getMetadataFunc<T, ID>(
   numbers?: string[],
   keys?: Attributes | Attribute[] | string[],
 ): Metadata | undefined {
-  const m: Metadata = { dates, numbers };
+  const m: Metadata = { dates, numbers }
   if ((m.dates && m.dates.length > 0) || (m.numbers && m.numbers.length > 0)) {
-    return m;
+    return m
   }
   if (keys) {
     if (!Array.isArray(keys)) {
-      return buildMetadata(keys);
+      return buildMetadata(keys)
     }
   }
-  if (typeof viewService !== 'function' && viewService.metadata) {
-    const metadata = viewService.metadata();
+  if (typeof viewService !== "function" && viewService.metadata) {
+    const metadata = viewService.metadata()
     if (metadata) {
-      return buildMetadata(metadata);
+      return buildMetadata(metadata)
     }
   }
-  return undefined;
+  return undefined
 }
