@@ -17,17 +17,17 @@ export interface Filter {
 }
 export interface SearchConfig {
   excluding?: string
-  fields?: string
+  // fields?: string
   list?: string
   total?: string
   token?: string
   last?: string
   csv?: boolean
-  page?: string
-  limit?: string
-  skip?: string
-  refId?: string
-  firstLimit?: string
+  // page?: string
+  // limit?: string
+  // skip?: string
+  // refId?: string;
+  // firstLimit?: string
 }
 export interface SearchResult<T> {
   list: T[]
@@ -311,23 +311,14 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
   }
   const c: SearchConfig = {
     excluding: conf.excluding,
-    fields: conf.fields,
     list: conf.list,
     total: conf.total,
     token: conf.token,
     last: conf.last,
     csv: conf.csv,
-    page: conf.page,
-    limit: conf.limit,
-    skip: conf.skip,
-    refId: conf.refId,
-    firstLimit: conf.firstLimit,
   }
   if (!c.excluding || c.excluding.length === 0) {
     c.excluding = "excluding"
-  }
-  if (!c.fields || c.fields.length === 0) {
-    c.fields = "fields"
   }
   if (!c.list || c.list.length === 0) {
     c.list = "list"
@@ -340,21 +331,6 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
   }
   if (!c.token || c.token.length === 0) {
     c.token = "nextPageToken"
-  }
-  if (!c.page || c.page.length === 0) {
-    c.page = "page"
-  }
-  if (!c.limit || c.limit.length === 0) {
-    c.limit = "limit"
-  }
-  if (!c.skip || c.skip.length === 0) {
-    c.skip = "skip"
-  }
-  if (!c.refId || c.refId.length === 0) {
-    c.refId = "refId"
-  }
-  if (!c.firstLimit || c.firstLimit.length === 0) {
-    c.firstLimit = "firstLimit"
   }
   return c
 }
@@ -461,7 +437,7 @@ const setKey = (_object: any, _isArrayKey: boolean, _key: string, _nextValue: an
   return _object
 }
 export interface Limit {
-  limit?: number
+  limit: number
   page?: number
   nextPageToken?: string
   fields?: string[]
@@ -469,187 +445,51 @@ export interface Limit {
 }
 export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
   const o: any = obj
-  if (!config) {
-    const sfield = "fields"
-    let fields
-    const fs = o[sfield]
-    if (fs && Array.isArray(fs)) {
-      fields = fs
-      delete o[sfield]
-    }
-    let refId = o["refId"]
-    if (!refId) {
-      refId = o["nextPageToken"]
-    }
-    const r: Limit = { fields, nextPageToken: refId }
-    let pageSize = o["limit"]
-    if (!pageSize) {
-      pageSize = o["pageSize"]
-    }
-    if (pageSize && !isNaN(pageSize)) {
-      const ipageSize = Math.floor(parseFloat(pageSize))
-      if (ipageSize > 0) {
-        r.limit = ipageSize
-        /*
-        const skip = o['skip'];
-        if (skip && !isNaN(skip)) {
-          const iskip = Math.floor(parseFloat(skip));
-          if (iskip >= 0) {
-            r.page = iskip;
-            r.pageOrNextPageToken = r.page;
-            deletePageInfo(o);
-            return r;
-          }
-        }
-        */
-        let pageIndex = o["page"]
-        if (!pageIndex) {
-          pageIndex = o["pageIndex"]
-          if (!pageIndex) {
-            pageIndex = o["pageNo"]
-          }
-        }
-        if (pageIndex && !isNaN(pageIndex)) {
-          let ipageIndex = Math.floor(parseFloat(pageIndex))
-          if (ipageIndex < 1) {
-            ipageIndex = 1
-          }
-          /*
-          let firstPageSize = o['firstLimit'];
-          if (!firstPageSize) {
-            firstPageSize = o['firstPageSize'];
-          }
-          if (!firstPageSize) {
-            firstPageSize = o['initPageSize'];
-          }
-          if (firstPageSize && !isNaN(firstPageSize)) {
-            const ifirstPageSize = Math.floor(parseFloat(firstPageSize));
-            if (ifirstPageSize > 0) {
-              r.page = ipageIndex;
-              r.pageOrNextPageToken = r.page;
-              deletePageInfo(o);
-              return r;
-            }
-          }
-            */
-          r.page = ipageIndex
-          r.pageOrNextPageToken = r.page
-          deletePageInfo(o)
-          return r
-        }
-        r.page = 1
-        if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.pageOrNextPageToken = r.nextPageToken
-        }
-        deletePageInfo(o)
-        return r
-      }
-    }
-    if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.pageOrNextPageToken = r.nextPageToken
-    }
-    deletePageInfo(o)
-    return r
-  } else {
-    let sfield = config.fields
-    if (!sfield || sfield.length === 0) {
-      sfield = "fields"
-    }
-    let fields
-    const fs = o[sfield]
-    if (fs && Array.isArray(fs)) {
-      fields = fs
-      delete o[sfield]
-    }
-    let strRefId = config.refId
-    if (!strRefId || strRefId.length === 0) {
-      strRefId = "refId"
-    }
-    const refId = o[strRefId]
-    const r: Limit = { fields, nextPageToken: refId }
-
-    let strLimit = config.limit
-    if (!strLimit || strLimit.length === 0) {
-      strLimit = "limit"
-    }
-    const pageSize = o[strLimit]
-    const arr = [config.page, config.limit, config.skip, config.refId, config.firstLimit]
-    if (pageSize && !isNaN(pageSize)) {
-      const ipageSize = Math.floor(parseFloat(pageSize))
-      if (ipageSize > 0) {
-        r.limit = ipageSize
-        let strSkip = config.skip
-        if (!strSkip || strSkip.length === 0) {
-          strSkip = "skip"
-        }
-        const skip = o[strSkip]
-        if (skip && !isNaN(skip)) {
-          const iskip = Math.floor(parseFloat(skip))
-          if (iskip >= 0) {
-            r.page = iskip
-            r.pageOrNextPageToken = r.page
-            deletePageInfo(o, arr)
-            return r
-          }
-        }
-        let strPage = config.page
-        if (!strPage || strPage.length === 0) {
-          strPage = "page"
-        }
-        const pageIndex = o[strPage]
-        if (pageIndex && !isNaN(pageIndex)) {
-          let ipageIndex = Math.floor(parseFloat(pageIndex))
-          if (ipageIndex < 1) {
-            ipageIndex = 1
-          }
-          let strFirstLimit = config.firstLimit
-          if (!strFirstLimit || strFirstLimit.length === 0) {
-            strFirstLimit = "firstLimit"
-          }
-          const firstPageSize = o[strFirstLimit]
-          if (firstPageSize && !isNaN(firstPageSize)) {
-            const ifirstPageSize = Math.floor(parseFloat(firstPageSize))
-            if (ifirstPageSize > 0) {
-              r.page = ipageSize * (ipageIndex - 2) + ifirstPageSize
-              r.pageOrNextPageToken = r.page
-              deletePageInfo(o, arr)
-              return r
-            }
-          }
-          r.page = ipageSize * (ipageIndex - 1)
-          r.pageOrNextPageToken = r.page
-          deletePageInfo(o, arr)
-          return r
-        }
-        r.page = 0
-        if (r.nextPageToken && r.nextPageToken.length > 0) {
-          r.pageOrNextPageToken = r.nextPageToken
-        }
-        deletePageInfo(o, arr)
-        return r
-      }
-    }
-    if (r.nextPageToken && r.nextPageToken.length > 0) {
-      r.pageOrNextPageToken = r.nextPageToken
-    }
-    deletePageInfo(o, arr)
-    return r
+  let fields: string[] | undefined
+  const fs = o[resources.fields]
+  if (fs && Array.isArray(fs)) {
+    fields = fs
   }
+  let nextPageToken: string | undefined = o[resources.nextPageToken]
+  let page = 1
+  let spage = o[resources.page]
+  if (spage && typeof spage === "string") {
+    if (!isNaN(spage as any)) {
+      const ipage = Math.floor(parseFloat(spage))
+      if (ipage > 1) {
+        page = ipage
+      }
+    }
+  }
+  let pageSize = resources.defaultLimit
+  let spageSize = o[resources.limit]
+  if (spageSize && typeof spageSize === "string") {
+    if (!isNaN(spageSize as any)) {
+      const ipageSize = Math.floor(parseFloat(spageSize))
+      if (ipageSize > 0) {
+        pageSize = ipageSize
+      }
+    }
+  }
+  const r: Limit = { limit: pageSize, fields, page, nextPageToken, pageOrNextPageToken: page }
+  if (r.nextPageToken && r.nextPageToken.length > 0) {
+    r.pageOrNextPageToken = r.nextPageToken
+  }
+  deletePageInfo(o)
+  return r
 }
 // tslint:disable-next-line:array-type
 export function deletePageInfo(obj: any, arr?: Array<string | undefined>): void {
   if (!arr || arr.length === 0) {
-    delete obj["limit"]
-    delete obj["firstLimit"]
-    delete obj["skip"]
-    delete obj["page"]
-    delete obj["pageNo"]
-    delete obj["pageIndex"]
-    delete obj["pageSize"]
-    delete obj["initPageSize"]
-    delete obj["firstPageSize"]
-    delete obj["refId"]
-    delete obj["nextPageToken"]
+    delete obj[resources.fields]
+    delete obj[resources.limit]
+    delete obj[resources.page]
+    if (resources.nextPageToken && resources.nextPageToken.length > 0) {
+      delete obj[resources.nextPageToken]
+    }
+    if (resources.partial && resources.partial.length > 0) {
+      delete obj[resources.partial]
+    }
   } else {
     for (const o of arr) {
       if (o && o.length > 0) {

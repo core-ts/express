@@ -12,9 +12,11 @@ export class resources {
   static limits = [12, 24, 60, 100, 120, 180, 300, 600]
   static pages = "pages"
   static page = "page"
+  static nextPageToken = "next"
   static limit = "limit"
   static defaultLimit = 12
   static sort = "sort"
+  static fields = "fields"
   static partial = "partial"
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[]

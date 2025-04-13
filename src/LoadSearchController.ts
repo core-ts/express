@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { resources } from "resources"
 import { handleError, Log } from "./http"
 import { LoadController, ViewService } from "./LoadController"
 import { Attribute, Attributes } from "./metadata"
@@ -9,7 +10,7 @@ export interface Search {
   load(req: Request, res: Response): void
 }
 export interface Query<T, ID, S> extends ViewService<T, ID> {
-  search: (s: S, limit?: number, skip?: number | string, fields?: string[]) => Promise<SearchResult<T>>
+  search: (s: S, limit: number, page?: number | string, fields?: string[]) => Promise<SearchResult<T>>
   metadata?(): Attributes | undefined
   load(id: ID, ctx?: any): Promise<T | null>
 }
@@ -19,7 +20,7 @@ export interface SearchManager {
 }
 export function useSearchController<T, ID, S extends Filter>(
   log: Log,
-  find: (s: S, limit?: number, skip?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
+  find: (s: S, limit: number, page?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
   viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
   array?: string[],
   dates?: string[],
@@ -39,12 +40,11 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
   csv?: boolean
   dates?: string[]
   numbers?: string[]
-  fields?: string
   excluding?: string
   array?: string[]
   constructor(
     log: Log,
-    public find: (s: S, limit?: number, skip?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
+    public find: (s: S, limit: number, page?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
     viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
     keys?: Attributes | Attribute[] | string[],
     config?: SearchConfig | boolean,
@@ -60,13 +60,9 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
         this.config = initializeConfig(config)
         if (this.config) {
           this.csv = this.config.csv
-          this.fields = this.config.fields
           this.excluding = this.config.excluding
         }
       }
-    }
-    if (!this.fields || this.fields.length === 0) {
-      this.fields = "fields"
     }
     const m = getMetadataFunc(viewService, dates, numbers, keys)
     if (m) {
@@ -75,7 +71,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
     }
   }
   search(req: Request, res: Response): void {
-    const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding))
+    const s = fromRequest<S>(req, buildArray(this.array, resources.fields, this.excluding))
     const l = getParameters(s, this.config)
     const s2 = format(s, this.dates, this.numbers)
     this.find(s2, l.limit, l.pageOrNextPageToken, l.fields)
@@ -88,7 +84,6 @@ export class QueryController<T, ID, S extends Filter> extends LoadController<T, 
   csv?: boolean
   dates?: string[]
   numbers?: string[]
-  fields?: string
   excluding?: string
   array?: string[]
   constructor(log: Log, protected query: Query<T, ID, S>, config?: SearchConfig | boolean, dates?: string[], numbers?: string[], array?: string[]) {
@@ -102,13 +97,9 @@ export class QueryController<T, ID, S extends Filter> extends LoadController<T, 
         this.config = initializeConfig(config)
         if (this.config) {
           this.csv = this.config.csv
-          this.fields = this.config.fields
           this.excluding = this.config.excluding
         }
       }
-    }
-    if (!this.fields || this.fields.length === 0) {
-      this.fields = "fields"
     }
     const m = getMetadataFunc(query, dates, numbers)
     if (m) {
@@ -117,7 +108,7 @@ export class QueryController<T, ID, S extends Filter> extends LoadController<T, 
     }
   }
   search(req: Request, res: Response): void {
-    const s = fromRequest<S>(req, buildArray(this.array, this.fields, this.excluding))
+    const s = fromRequest<S>(req, buildArray(this.array, resources.fields, this.excluding))
     const l = getParameters(s, this.config)
     const s2 = format(s, this.dates, this.numbers)
     this.query
