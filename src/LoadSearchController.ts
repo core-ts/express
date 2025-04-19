@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
-import { resources } from "resources"
 import { handleError, Log } from "./http"
 import { LoadController, ViewService } from "./LoadController"
 import { Attribute, Attributes } from "./metadata"
+import { resources } from "./resources"
 import { buildArray, Filter, format, fromRequest, getMetadataFunc, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from "./search"
 
 export interface Search {

@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
-import { resources } from "resources"
 import { handleError, Log } from "./http"
+import { resources } from "./resources"
 import { buildArray, Filter, format, fromRequest, getParameters, initializeConfig, jsonResult, SearchConfig, SearchResult } from "./search"
 
 export class SearchController<T, S extends Filter> {

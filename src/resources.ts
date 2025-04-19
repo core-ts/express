@@ -9,6 +9,8 @@ export interface StringMap {
 }
 // tslint:disable-next-line:class-name
 export class resources {
+  static languageParam = "lang"
+  static defaultLanguage = "en"
   static limits = [12, 24, 60, 100, 120, 180, 300, 600]
   static pages = "pages"
   static page = "page"

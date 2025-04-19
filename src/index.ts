@@ -2,13 +2,13 @@ import { NextFunction, Request, Response } from "express"
 import { GenericController } from "./GenericController"
 import { GenericSearchController } from "./GenericSearchController"
 import { HealthController } from "./HealthController"
-import { handleError, Log } from "./http"
+import { handleError, Log, query } from "./http"
 import { LoadController } from "./LoadController"
 import { LoadSearchController } from "./LoadSearchController"
 import { LogController } from "./LogController"
 import { Controller, Service } from "./LowCodeController"
 import { ErrorMessage } from "./metadata"
-import { StringMap } from "./resources"
+import { resources, StringMap } from "./resources"
 import { SearchController } from "./SearchController"
 
 export { HealthController as HealthHandler, LoadController as LoadHandler, LogController as LogHandler, LoadController as ViewHandler }
@@ -380,4 +380,36 @@ export function escapeArray<T>(arrs: T[]): T[] {
     }
   }
   return arrs
+}
+
+export function buildError404(resource: StringMap, res: Response): any {
+  return {
+    message: {
+      title: resource.error_404_title,
+      description: resource.error_404_message,
+    },
+    menu: res.locals.menu,
+  }
+}
+export function buildError500(resource: StringMap, res: Response): any {
+  return {
+    message: {
+      title: resource.error_500_title,
+      description: resource.error_500_message,
+    },
+    menu: res.locals.menu,
+  }
+}
+export function buildError(res: Response, title: string, description: string): any {
+  return {
+    message: {
+      title,
+      description,
+    },
+    menu: res.locals.menu,
+  }
+}
+export function queryLang(req: Request): string {
+  const lang = query(req, resources.languageParam)
+  return lang && lang.length > 0 ? lang : resources.defaultLanguage
 }
