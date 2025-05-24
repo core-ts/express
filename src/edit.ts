@@ -140,3 +140,9 @@ export function isTypeError(errs: ErrorMessage[]): boolean {
   }
   return false
 }
+export function getStatusCode(errs: ErrorMessage[]): number {
+  return isTypeError(errs) ? 400 : 422
+}
+export function respondError(res: Response, errors: ErrorMessage[]) {
+  res.status(getStatusCode(errors)).json(errors).end()
+}

@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { checkId, create, isTypeError, update } from "./edit"
+import { checkId, create, getStatusCode, update } from "./edit"
 import { handleError, Log } from "./http"
 import { LoadController } from "./LoadController"
 import { Attribute, Attributes, ErrorMessage } from "./metadata"
@@ -165,9 +165,7 @@ export function getDeleteStatus(count: number): number {
     return 409
   }
 }
-export function getStatusCode(errs: ErrorMessage[]): number {
-  return isTypeError(errs) ? 400 : 422
-}
+
 export interface ModelConfig {
   id?: string
   payload?: string
