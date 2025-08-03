@@ -278,7 +278,14 @@ export function cloneFilter<F extends Filter>(obj: F, limit: number, page: numbe
   }
   return f
 }
-
+export function addSequence<T>(list: T[], offset: number, name?: string): T[] {
+  const n = name ? name : "sequence"
+  const l = list.length
+  for (let i = 0; i < l; i++) {
+    ;(list[i] as any)[n] = offset + i + 1
+  }
+  return list
+}
 export function jsonResult<T>(res: Response, result: SearchResult<T>, quick?: boolean, fields?: string[], config?: SearchConfig): void {
   if (quick && fields && fields.length > 0) {
     res.status(200).json(toCsv(fields, result)).end()
