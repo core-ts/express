@@ -370,13 +370,19 @@ export function escape(obj: any): any {
   }
   return obj
 }
-export function escapeArray<T>(arrs: T[]): T[] {
+export function escapeArray<T>(arrs: T[], offset: number = 0, name?: string): T[] {
   if (!arrs) {
     return arrs
   }
   if (arrs.length > 0) {
     for (const obj of arrs) {
       escape(obj)
+    }
+  }
+  if (name) {
+    const l = arrs.length
+    for (let i = 0; i < l; i++) {
+      ;(arrs[i] as any)[name] = offset + i + 1
     }
   }
   return arrs
