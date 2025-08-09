@@ -38,17 +38,7 @@ export interface Model {
 export interface Attribute {
   name?: string
   type?: Type
-  format?: Format
-  required?: boolean
   key?: boolean
-  length?: number
-  min?: number
-  max?: number
-  gt?: number
-  lt?: number
-  exp?: RegExp | string
-  code?: string
-  typeof?: Attributes
 }
 export interface Attributes {
   [key: string]: Attribute
