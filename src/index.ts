@@ -340,7 +340,7 @@ const map: StringMap = {
   "'": "&#39;",
   "`": "&#96;",
 }
-function escapeHTML(input: string): string {
+export function escapeHTML(input: string): string {
   return input.replace(/[&<>"'`]/g, function (char) {
     return map[char]
   })
