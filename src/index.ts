@@ -345,6 +345,12 @@ export function escapeHTML(input: string): string {
     return map[char]
   })
 }
+export function generateChip(v: string): string {
+  return `<div class="chip">${escapeHTML(v)}<span class="close" onclick="removeChip(event)"></span></div>`
+}
+export function generateChips(v?: string[] | null): string {
+  return !v ? "" : `${v.map(generateChip).join("")}`
+}
 
 const s = "string"
 const o = "object"
