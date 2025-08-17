@@ -1,6 +1,6 @@
 {
   "name": "express-ext",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "description": "express-ext",
   "main": "./lib/index.js",
   "types": "./src/index.ts",
