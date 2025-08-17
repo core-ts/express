@@ -332,6 +332,45 @@ export function toMap(errors: ErrorMessage[]): ErrorMap {
   }
   return errorMap
 }
+
+interface SaveService<T> {
+  create(obj: T, ctx?: any): Promise<number | T | ErrorMessage[]>
+  update(obj: T, ctx?: any): Promise<number | T | ErrorMessage[]>
+}
+export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveService<T>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean) {
+  if (!isEdit) {
+    service
+      .create(obj)
+      .then((result) => {
+        if (Array.isArray(result)) {
+          res.status(422).json(result).end()
+        } else if (typeof result === "number" && result <= 0) {
+          res.status(409).json(result).end()
+        } else {
+          res.status(201).json(obj).end()
+        }
+      })
+      .catch((err) => handleError(err, res, log))
+  } else {
+    service
+      .update(obj)
+      .then((result) => {
+        if (result === 0) {
+          res.status(410).end()
+        } else if (Array.isArray(result)) {
+          res.status(422).json(result).end()
+        } else if (typeof result === "number" && result < 0) {
+          res.status(409).json(result).end()
+        } else {
+          res
+            .status(200)
+            .json(returnNumber ? result : obj)
+            .end()
+        }
+      })
+      .catch((err) => handleError(err, res, log))
+  }
+}
 const map: StringMap = {
   "&": "&amp;",
   "<": "&lt;",

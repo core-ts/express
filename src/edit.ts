@@ -83,7 +83,10 @@ export function create<T>(
       } else if (Array.isArray(result)) {
         res.status(422).json(result).end()
       } else {
-        res.status(201).json(result).end()
+        res
+          .status(201)
+          .json(returnNumber ? result : obj)
+          .end()
       }
     })
     .catch((err) => handleError(err, res, log))
@@ -111,7 +114,10 @@ export function update<T>(
       } else if (Array.isArray(result)) {
         res.status(422).json(result).end()
       } else {
-        res.status(200).json(result).end()
+        res
+          .status(200)
+          .json(returnNumber ? result : obj)
+          .end()
       }
     })
     .catch((err) => handleError(err, res, log))
