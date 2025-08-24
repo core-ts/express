@@ -384,12 +384,19 @@ export function escapeHTML(input: string): string {
     return map[char]
   })
 }
-export function generateChip(v: string, noClose?: boolean): string {
+export function generateChip(value: string, text: string, noClose?: boolean): string {
   const s = noClose ? "" : `<span class="close" onclick="removeChip(event)"></span>`
-  return `<div class="chip">${escapeHTML(v)}${s}</div>`
+  return `<div class="chip" data-value="${escapeHTML(value)}">${escapeHTML(text)}${s}</div>`
 }
-export function generateChips(v?: string[] | null, noClose?: boolean): string {
-  return !v ? "" : `${v.map((s) => generateChip(s, noClose)).join("")}`
+export function generateTags(v?: string[] | null, noClose?: boolean): string {
+  return !v ? "" : `${v.map((s) => generateChip(s, s, noClose)).join("")}`
+}
+export interface Item {
+  value: string
+  text: string
+}
+export function generateChips(v?: Item[] | null, noClose?: boolean): string {
+  return !v ? "" : `${v.map((s) => generateChip(s.value, s.text, noClose)).join("")}`
 }
 
 const s = "string"
