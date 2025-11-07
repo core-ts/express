@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express"
 import { GenericController } from "./GenericController"
 import { GenericSearchController } from "./GenericSearchController"
 import { HealthController } from "./HealthController"
@@ -23,6 +23,7 @@ export {
   SearchController as SearchHandler,
 }
 
+export * from "./access"
 export * from "./client"
 export * from "./edit"
 export * from "./GenericController"
@@ -41,44 +42,6 @@ export * from "./search"
 export * from "./SearchController"
 export * from "./view"
 
-export interface AccessConfig {
-  origin?: string | string[]
-  credentials?: string | string[]
-  methods?: string | string[]
-  headers: number | string | ReadonlyArray<string>
-}
-export type AccessControlAllowConfig = AccessConfig
-export function allow(access: AccessConfig): (req: Request, res: Response, next: NextFunction) => void {
-  const ao = access.origin
-  if (typeof ao === "string") {
-    return (req: Request, res: Response, next: NextFunction) => {
-      res.header("Access-Control-Allow-Origin", access.origin)
-      res.header("Access-Control-Allow-Credentials", access.credentials)
-      res.header("Access-Control-Allow-Methods", access.methods)
-      res.setHeader("Access-Control-Allow-Headers", access.headers)
-      next()
-    }
-  } else if (Array.isArray(ao) && ao.length > 0) {
-    return (req: Request, res: Response, next: NextFunction) => {
-      const origin = req.headers.origin
-      if (origin) {
-        if (ao.includes(origin)) {
-          res.setHeader("Access-Control-Allow-Origin", origin)
-        }
-      }
-      res.header("Access-Control-Allow-Credentials", access.credentials)
-      res.header("Access-Control-Allow-Methods", access.methods)
-      res.setHeader("Access-Control-Allow-Headers", access.headers)
-      next()
-    }
-  }
-  return (req: Request, res: Response, next: NextFunction) => {
-    res.header("Access-Control-Allow-Credentials", access.credentials)
-    res.header("Access-Control-Allow-Methods", access.methods)
-    res.setHeader("Access-Control-Allow-Headers", access.headers)
-    next()
-  }
-}
 export interface SavedService<T> {
   load(id: string): Promise<T[]>
   save(id: string, itemId: string): Promise<number>
@@ -384,9 +347,10 @@ export function escapeHTML(input: string): string {
     return map[char]
   })
 }
-export function generateChip(value: string, text: string, noClose?: boolean): string {
+export function generateChip(value: string, text: string, noClose?: boolean, hasStar?: boolean): string {
   const s = noClose ? "" : `<span class="close" onclick="removeChip(event)"></span>`
-  return `<div class="chip" data-value="${escapeHTML(value)}">${escapeHTML(text)}${s}</div>`
+  const t = hasStar ? `<i className="star highlight"></i>` : ""
+  return `<div class="chip" data-value="${escapeHTML(value)}">${escapeHTML(text)}${t}${s}</div>`
 }
 export function generateTags(v?: string[] | null, noClose?: boolean): string {
   return !v ? "" : `${v.map((s) => generateChip(s, s, noClose)).join("")}`
@@ -397,6 +361,9 @@ export interface Item {
 }
 export function generateChips(v?: Item[] | null, noClose?: boolean): string {
   return !v ? "" : `${v.map((s) => generateChip(s.value, s.text, noClose)).join("")}`
+}
+export function generateStarChips(v: any[] | null | undefined, value: string, text: string, star: string, noClose?: boolean): string {
+  return !v ? "" : `${v.map((s) => generateChip(s[value], s[text], noClose, s[star] === true)).join("")}`
 }
 
 const s = "string"
