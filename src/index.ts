@@ -42,132 +42,115 @@ export * from "./search"
 export * from "./SearchController"
 export * from "./view"
 
-export interface SavedService<T> {
-  load(id: string): Promise<T[]>
-  save(id: string, itemId: string): Promise<number>
-  remove(id: string, itemId: string): Promise<number>
+export interface SavedService {
+  save(userId: string, id: string): Promise<number>
+  remove(userId: string, id: string): Promise<number>
 }
-export class SavedController<T> {
-  constructor(public log: (msg: string) => void, public service: SavedService<T>, public item: string, id?: string) {
+export class SavedController {
+  constructor(protected savedService: SavedService, protected log: (msg: string) => void, id?: string, userId?: string) {
+    this.userId = userId && userId.length > 0 ? userId : "userId"
     this.id = id && id.length > 0 ? id : "id"
     this.save = this.save.bind(this)
     this.remove = this.remove.bind(this)
-    this.load = this.load.bind(this)
   }
-  id: string
+  protected userId: string
+  protected id: string
   save(req: Request, res: Response) {
+    const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
-    const itemId = req.params[this.item]
     if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
+      return res.status(400).end(`'${this.id}' cannot be empty`)
     }
-    if (!itemId || itemId.length === 0) {
-      res.status(400).end(`'${this.item}' cannot be empty`)
-      return
+    if (!userId || userId.length === 0) {
+      return res.status(400).end(`'${this.userId}' cannot be empty`)
     }
-    this.service
-      .save(id, itemId)
-      .then((data) => {
-        res.status(200).json(data).end()
+    this.savedService
+      .save(userId, id)
+      .then((result) => {
+        const status = result > 0 ? 200 : result === 0 ? 409 : 422
+        res.status(status).json(result).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
   remove(req: Request, res: Response) {
-    const id = req.params[this.id]
-    const itemId = req.params[this.item]
-    if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
-    }
-    if (!itemId || itemId.length === 0) {
-      res.status(400).end(`'${this.item}' cannot be empty`)
-      return
-    }
-    this.service
-      .remove(id, itemId)
-      .then((data) => {
-        res.status(200).json(data).end()
-      })
-      .catch((err) => handleError(err, res, this.log))
-  }
-  load(req: Request, res: Response) {
+    const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
+      return res.status(400).end(`'${this.id}' cannot be empty`)
     }
-    this.service
-      .load(id)
-      .then((data) => {
-        res.status(200).json(data).end()
+    if (!userId || userId.length === 0) {
+      return res.status(400).end(`'${this.userId}' cannot be empty`)
+    }
+    this.savedService
+      .remove(userId, id)
+      .then((result) => {
+        const status = result > 0 ? 200 : 410
+        res.status(status).json(result).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
 }
 export interface FollowService {
-  follow(id: string, target: string): Promise<number | undefined>
+  follow(id: string, target: string): Promise<number>
   unfollow(id: string, target: string): Promise<number>
   checkFollow(id: string, target: string): Promise<number>
 }
 // tslint:disable-next-line:max-classes-per-file
 export class FollowController {
-  constructor(public log: Log, public service: FollowService, public target: string, id: string) {
+  constructor(protected service: FollowService, protected log: Log, id?: string, userId?: string) {
+    this.userId = userId && userId.length > 0 ? userId : "userId"
     this.id = id && id.length > 0 ? id : "id"
     this.follow = this.follow.bind(this)
     this.unfollow = this.unfollow.bind(this)
     this.checkFollow = this.checkFollow.bind(this)
   }
-  id: string
+  protected userId: string
+  protected id: string
   follow(req: Request, res: Response): void {
-    const id = req.params.id
-    const target = req.params.target
+    const userId: string = res.locals[this.userId]
+    const id = req.params[this.id]
     if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
+      return res.status(400).end(`'${this.id}' cannot be empty`)
     }
-    if (!target || target.length === 0) {
-      res.status(400).end(`'${this.target}' cannot be empty`)
-      return
+    if (!userId || userId.length === 0) {
+      return res.status(400).end(`'${this.userId}' cannot be empty`)
     }
     this.service
-      .follow(id, target)
-      .then((count) => {
-        return res.status(200).json(count).end()
+      .follow(userId, id)
+      .then((result) => {
+        const status = result > 0 ? 200 : 409
+        res.status(status).json(result).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
   unfollow(req: Request, res: Response): void {
-    const id = req.params.id
-    const target = req.params.target
+    const userId: string = res.locals[this.userId]
+    const id = req.params[this.id]
     if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
+      return res.status(400).end(`'${this.id}' cannot be empty`)
     }
-    if (!target || target.length === 0) {
-      res.status(400).end(`'${this.target}' cannot be empty`)
-      return
+    if (!userId || userId.length === 0) {
+      return res.status(400).end(`'${this.userId}' cannot be empty`)
     }
     this.service
-      .unfollow(id, target)
-      .then((count) => {
-        return res.status(200).json(count).end()
+      .unfollow(userId, id)
+      .then((result) => {
+        const status = result > 0 ? 200 : 410
+        res.status(status).json(result).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
   checkFollow(req: Request, res: Response): void {
-    const id = req.params.id
-    const target = req.params.target
+    const userId: string = res.locals[this.userId]
+    const id = req.params[this.id]
     if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
+      return res.status(400).end(`'${this.id}' cannot be empty`)
     }
-    if (!target || target.length === 0) {
-      res.status(400).end(`'${this.target}' cannot be empty`)
-      return
+    if (!userId || userId.length === 0) {
+      return res.status(400).end(`'${this.userId}' cannot be empty`)
     }
     this.service
-      .checkFollow(id, target)
+      .checkFollow(userId, id)
       .then((count) => {
         return res.status(200).json(count).end()
       })
