@@ -93,7 +93,6 @@ export class SavedController {
 export interface FollowService {
   follow(id: string, target: string): Promise<number>
   unfollow(id: string, target: string): Promise<number>
-  checkFollow(id: string, target: string): Promise<number>
 }
 // tslint:disable-next-line:max-classes-per-file
 export class FollowController {
@@ -102,7 +101,6 @@ export class FollowController {
     this.id = id && id.length > 0 ? id : "id"
     this.follow = this.follow.bind(this)
     this.unfollow = this.unfollow.bind(this)
-    this.checkFollow = this.checkFollow.bind(this)
   }
   protected userId: string
   protected id: string
@@ -137,22 +135,6 @@ export class FollowController {
       .then((result) => {
         const status = result > 0 ? 200 : 410
         res.status(status).json(result).end()
-      })
-      .catch((err) => handleError(err, res, this.log))
-  }
-  checkFollow(req: Request, res: Response): void {
-    const userId: string = res.locals[this.userId]
-    const id = req.params[this.id]
-    if (!id || id.length === 0) {
-      return res.status(400).end(`'${this.id}' cannot be empty`)
-    }
-    if (!userId || userId.length === 0) {
-      return res.status(400).end(`'${this.userId}' cannot be empty`)
-    }
-    this.service
-      .checkFollow(userId, id)
-      .then((count) => {
-        return res.status(200).json(count).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
