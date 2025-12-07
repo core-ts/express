@@ -104,7 +104,7 @@ export class FollowController {
   }
   protected userId: string
   protected id: string
-  follow(req: Request, res: Response): void {
+  follow(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
@@ -121,7 +121,7 @@ export class FollowController {
       })
       .catch((err) => handleError(err, res, this.log))
   }
-  unfollow(req: Request, res: Response): void {
+  unfollow(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
@@ -153,7 +153,7 @@ export class UserReactionController {
     this.checkReaction = this.checkReaction.bind(this)
   }
   id: string
-  react(req: Request, res: Response): void {
+  react(req: Request, res: Response) {
     const id = req.params.id
     const author = req.params.author
     const reaction = req.params.reaction
@@ -176,7 +176,7 @@ export class UserReactionController {
       })
       .catch((err) => handleError(err, res, this.log))
   }
-  unreact(req: Request, res: Response): void {
+  unreact(req: Request, res: Response) {
     const id = req.params.id
     const author = req.params.author
     const reaction = req.params.reaction
@@ -199,7 +199,7 @@ export class UserReactionController {
       })
       .catch((err) => handleError(err, res, this.log))
   }
-  checkReaction(req: Request, res: Response): void {
+  checkReaction(req: Request, res: Response) {
     const id = req.params.id
     const author = req.params.author
     if (!id || id.length === 0) {
@@ -314,7 +314,7 @@ export function escapeHTML(input: string): string {
 }
 export function generateChip(value: string, text: string, noClose?: boolean, hasStar?: boolean): string {
   const s = noClose ? "" : `<span class="close" onclick="removeChip(event)"></span>`
-  const t = hasStar ? `<i className="star highlight"></i>` : ""
+  const t = hasStar ? `<i class="star highlight"></i>` : ""
   return `<div class="chip" data-value="${escapeHTML(value)}">${escapeHTML(text)}${t}${s}</div>`
 }
 export function generateTags(v?: string[] | null, noClose?: boolean): string {
