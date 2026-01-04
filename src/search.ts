@@ -36,6 +36,113 @@ export interface SearchResult<T> {
   last?: boolean
 }
 
+export function getPage<F extends Filter>(req: Request, filter?: F): number {
+  if (filter) {
+    const v0 = (filter as any)[resources.page]
+    if (v0 == undefined) {
+      const field = req.query[resources.page]
+      const v = field ? field.toString() : undefined
+      if (!v || v.length === 0) {
+        ;(filter as any)[resources.page] = 1
+        return 1
+      }
+      if (isNaN(v as any)) {
+        ;(filter as any)[resources.page] = 1
+        return 1
+      } else {
+        let n = parseFloat(v)
+        if (n < 1) {
+          n = 1
+        }
+        ;(filter as any)[resources.page] = n
+        return n
+      }
+    } else if (typeof v0 === "number") {
+      if (v0 > 0) {
+        return v0
+      } else {
+        ;(filter as any)[resources.page] = 1
+        return 1
+      }
+    }
+  }
+  const field = req.query[resources.page]
+  const v = field ? field.toString() : undefined
+  if (!v || v.length === 0) {
+    if (filter) {
+      ;(filter as any)[resources.page] = 1
+    }
+    return 1
+  }
+  if (isNaN(v as any)) {
+    if (filter) {
+      ;(filter as any)[resources.page] = 1
+    }
+    return 1
+  }
+  let n = parseFloat(v)
+  if (n < 1) {
+    n = 1
+  }
+  if (filter) {
+    ;(filter as any)[resources.page] = n
+  }
+  return n
+}
+
+export function getLimit<F extends Filter>(req: Request, filter?: F): number {
+  if (filter) {
+    const v0 = (filter as any)[resources.limit]
+    if (v0 == undefined) {
+      const field = req.query[resources.limit]
+      const v = field ? field.toString() : undefined
+      if (!v || v.length === 0) {
+        ;(filter as any)[resources.limit] = resources.defaultLimit
+        return resources.defaultLimit
+      }
+      if (isNaN(v as any)) {
+        ;(filter as any)[resources.limit] = resources.defaultLimit
+        return 1
+      } else {
+        let n = parseFloat(v)
+        if (n < 1) {
+          n = resources.defaultLimit
+        }
+        ;(filter as any)[resources.limit] = n
+        return n
+      }
+    } else if (typeof v0 === "number") {
+      if (v0 > 0) {
+        return v0
+      } else {
+        ;(filter as any)[resources.limit] = resources.defaultLimit
+        return resources.defaultLimit
+      }
+    }
+  }
+  const field = req.query[resources.limit]
+  const v = field ? field.toString() : undefined
+  if (!v || v.length === 0) {
+    if (filter) {
+      ;(filter as any)[resources.limit] = resources.defaultLimit
+    }
+    return resources.defaultLimit
+  }
+  if (isNaN(v as any)) {
+    if (filter) {
+      ;(filter as any)[resources.limit] = resources.defaultLimit
+    }
+    return resources.defaultLimit
+  }
+  let n = parseFloat(v)
+  if (n < 1) {
+    n = resources.defaultLimit
+  }
+  if (filter) {
+    ;(filter as any)[resources.limit] = n
+  }
+  return n
+}
 export function queryLimit(req: Request): number {
   return queryNumber(req, resources.limit, resources.defaultLimit)
 }
@@ -343,6 +450,38 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
 }
 export function fromRequest<S>(req: Request, arr?: string[]): S {
   const s: any = req.method === "GET" ? fromUrl(req, arr) : req.body
+  const page = s[resources.page]
+  if (page) {
+    if (isNaN(page as any)) {
+      s[resources.page] = 1
+    } else {
+      let n = parseFloat(page)
+      if (n < 1) {
+        n = 1
+      }
+      s[resources.page] = n
+    }
+  } else {
+    s[resources.page] = 1
+  }
+
+  const limit = s[resources.limit]
+  if (limit) {
+    if (isNaN(page as any)) {
+      s[resources.limit] = resources.defaultLimit
+    } else {
+      let n = parseFloat(limit)
+      if (n < 1) {
+        n = resources.defaultLimit
+      }
+      s[resources.page] = n
+    }
+  } else {
+    s[resources.limit] = resources.defaultLimit
+  }
+  if (resources.partial.length > 0) {
+    delete s[resources.partial]
+  }
   return s
 }
 export function buildArray(arr?: string[], s0?: string, s1?: string, s2?: string): string[] {
