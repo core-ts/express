@@ -69,22 +69,21 @@ export class LogController {
   }
   config(req: Request, res: Response) {
     const obj: LogConfig = req.body
-    if (!obj || (obj as any) === "") {
-      return res.status(400).end("The request body cannot be empty")
-    }
     if (!this.logger) {
-      return res.status(503).end("Logger is not available")
+      res.status(503).end("Logger is not available")
+      return
     }
     if (typeof obj.level === "string" && obj.level.length > 0) {
       if (!this.map) {
-        return res.status(503).end("Map is not available")
+        res.status(503).end("Map is not available")
+        return
       }
     }
     const changed = this.update(this.logger, obj, this.map)
     if (changed) {
-      return res.status(200).json(true).end()
+      res.status(200).json(true).end()
     } else {
-      return res.status(204).json(false).end()
+      res.status(204).json(false).end()
     }
   }
 }

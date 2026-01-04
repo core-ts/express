@@ -20,7 +20,7 @@ export {
   Controller as Handler,
   LoadSearchController as LoadSearchHandler,
   Service as LowCodeService,
-  SearchController as SearchHandler,
+  SearchController as SearchHandler
 }
 
 export * from "./access"
@@ -59,10 +59,12 @@ export class SavedController {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
-      return res.status(400).end(`'${this.id}' cannot be empty`)
+      res.status(400).end(`'${this.id}' cannot be empty`)
+      return
     }
     if (!userId || userId.length === 0) {
-      return res.status(400).end(`'${this.userId}' cannot be empty`)
+      res.status(400).end(`'${this.userId}' cannot be empty`)
+      return
     }
     this.savedService
       .save(userId, id)
@@ -76,10 +78,12 @@ export class SavedController {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
-      return res.status(400).end(`'${this.id}' cannot be empty`)
+      res.status(400).end(`'${this.id}' cannot be empty`)
+      return
     }
     if (!userId || userId.length === 0) {
-      return res.status(400).end(`'${this.userId}' cannot be empty`)
+      res.status(400).end(`'${this.userId}' cannot be empty`)
+      return
     }
     this.savedService
       .remove(userId, id)
@@ -108,10 +112,12 @@ export class FollowController {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
-      return res.status(400).end(`'${this.id}' cannot be empty`)
+      res.status(400).end(`'${this.id}' cannot be empty`)
+      return
     }
     if (!userId || userId.length === 0) {
-      return res.status(400).end(`'${this.userId}' cannot be empty`)
+      res.status(400).end(`'${this.userId}' cannot be empty`)
+      return
     }
     this.service
       .follow(userId, id)
@@ -125,10 +131,12 @@ export class FollowController {
     const userId: string = res.locals[this.userId]
     const id = req.params[this.id]
     if (!id || id.length === 0) {
-      return res.status(400).end(`'${this.id}' cannot be empty`)
+      res.status(400).end(`'${this.id}' cannot be empty`)
+      return
     }
     if (!userId || userId.length === 0) {
-      return res.status(400).end(`'${this.userId}' cannot be empty`)
+      res.status(400).end(`'${this.userId}' cannot be empty`)
+      return
     }
     this.service
       .unfollow(userId, id)
@@ -172,7 +180,7 @@ export class UserReactionController {
     this.service
       .react(id, author, reaction)
       .then((count) => {
-        return res.status(200).json(count).end()
+        res.status(200).json(count).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
@@ -195,7 +203,7 @@ export class UserReactionController {
     this.service
       .unreact(id, author, reaction)
       .then((count) => {
-        return res.status(200).json(count).end()
+        res.status(200).json(count).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }
@@ -213,7 +221,7 @@ export class UserReactionController {
     this.service
       .checkReaction(id, author)
       .then((count) => {
-        return res.status(200).json(count).end()
+        res.status(200).json(count).end()
       })
       .catch((err) => handleError(err, res, this.log))
   }

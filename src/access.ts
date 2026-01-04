@@ -1,6 +1,4 @@
-import { NextFunction } from "express"
-import { ParamsDictionary, Request, Response } from "express-serve-static-core"
-import { ParsedQs } from "qs"
+import { NextFunction, Request, Response } from "express"
 
 export interface AccessConfig {
   origin?: string | string[]
@@ -11,10 +9,10 @@ export interface AccessConfig {
 export type AccessControlAllowConfig = AccessConfig
 export function allow(
   access: AccessConfig,
-): (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) => void {
+): (req: Request, res: Response, next: NextFunction) => void {
   const ao = access.origin
   if (typeof ao === "string") {
-    return (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       res.header("Access-Control-Allow-Origin", access.origin)
       res.header("Access-Control-Allow-Credentials", access.credentials)
       res.header("Access-Control-Allow-Methods", access.methods)
@@ -22,7 +20,7 @@ export function allow(
       next()
     }
   } else if (Array.isArray(ao) && ao.length > 0) {
-    return (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       const origin = req.headers.origin
       if (origin) {
         if (ao.includes(origin)) {
@@ -35,7 +33,7 @@ export function allow(
       next()
     }
   }
-  return (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     res.header("Access-Control-Allow-Credentials", access.credentials)
     res.header("Access-Control-Allow-Methods", access.methods)
     res.setHeader("Access-Control-Allow-Headers", access.headers)
