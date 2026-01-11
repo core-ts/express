@@ -21,7 +21,7 @@ export interface SearchConfig {
   list?: string
   total?: string
   token?: string
-  last?: string
+  // last?: string
   csv?: boolean
   // page?: string
   // limit?: string
@@ -33,7 +33,6 @@ export interface SearchResult<T> {
   list: T[]
   total?: number
   nextPageToken?: string
-  last?: boolean
 }
 
 export function getPage<F extends Filter>(req: Request, filter?: F): number {
@@ -413,10 +412,6 @@ export function buildResult<T>(r: SearchResult<T>, conf?: SearchConfig): any {
     const t = conf.token ? conf.token : "token"
     x[t] = r.nextPageToken
   }
-  if (r.last) {
-    const l = conf.last ? conf.last : "last"
-    x[l] = r.last
-  }
   return x
 }
 export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined {
@@ -428,7 +423,6 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
     list: conf.list,
     total: conf.total,
     token: conf.token,
-    last: conf.last,
     csv: conf.csv,
   }
   if (!c.excluding || c.excluding.length === 0) {
@@ -439,9 +433,6 @@ export function initializeConfig(conf?: SearchConfig): SearchConfig | undefined 
   }
   if (!c.total || c.total.length === 0) {
     c.total = "total"
-  }
-  if (!c.last || c.last.length === 0) {
-    c.last = "last"
   }
   if (!c.token || c.token.length === 0) {
     c.token = "nextPageToken"
@@ -467,14 +458,14 @@ export function fromRequest<S>(req: Request, arr?: string[]): S {
 
   const limit = s[resources.limit]
   if (limit) {
-    if (isNaN(page as any)) {
+    if (isNaN(limit as any)) {
       s[resources.limit] = resources.defaultLimit
     } else {
       let n = parseFloat(limit)
       if (n < 1) {
         n = resources.defaultLimit
       }
-      s[resources.page] = n
+      s[resources.limit] = n
     }
   } else {
     s[resources.limit] = resources.defaultLimit
@@ -589,7 +580,7 @@ export interface Limit {
   fields?: string[]
   pageOrNextPageToken?: string | number
 }
-export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
+export function getParameters<T>(obj: T): Limit {
   const o: any = obj
   let fields: string[] | undefined
   const fs = o[resources.fields]
@@ -607,17 +598,17 @@ export function getParameters<T>(obj: T, config?: SearchConfig): Limit {
       }
     }
   }
-  let pageSize = resources.defaultLimit
-  let spageSize = o[resources.limit]
-  if (spageSize && typeof spageSize === "string") {
-    if (!isNaN(spageSize as any)) {
-      const ipageSize = Math.floor(parseFloat(spageSize))
-      if (ipageSize > 0) {
-        pageSize = ipageSize
+  let limit = resources.defaultLimit
+  let slimit = o[resources.limit]
+  if (slimit && typeof slimit === "string") {
+    if (!isNaN(slimit as any)) {
+      const ilimit = Math.floor(parseFloat(slimit))
+      if (ilimit > 0) {
+        limit = ilimit
       }
     }
   }
-  const r: Limit = { limit: pageSize, fields, page, nextPageToken, pageOrNextPageToken: page }
+  const r: Limit = { limit: limit, fields, page, nextPageToken, pageOrNextPageToken: page }
   if (r.nextPageToken && r.nextPageToken.length > 0) {
     r.pageOrNextPageToken = r.nextPageToken
   }
@@ -654,7 +645,7 @@ export function toCsv<T>(fields: string[], r: SearchResult<T>): string {
     const n = "number"
     const b = '""'
     const rows: string[] = []
-    rows.push("" + (r.total ? r.total : "") + "," + (r.nextPageToken ? r.nextPageToken : "") + "," + (r.last ? "1" : ""))
+    rows.push("" + (r.total ? r.total : "") + "," + (r.nextPageToken ? r.nextPageToken : ""))
     for (const item of r.list) {
       const cols: string[] = []
       for (const name of fields) {

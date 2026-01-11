@@ -39,7 +39,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, buildArray(this.array, resources.fields, this.excluding))
-    const l = getParameters(s, this.config)
+    const l = getParameters(s)
     const s2 = format(s, this.dates, this.numbers)
     this.lowCodeService
       .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
@@ -79,7 +79,7 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, buildArray(this.array, resources.fields, this.excluding))
-    const l = getParameters(s, this.config)
+    const l = getParameters(s)
     const s2 = format(s, this.dates, this.numbers)
     this.lowCodeService
       .search(s2, l.limit, l.pageOrNextPageToken, l.fields)

@@ -37,7 +37,7 @@ export class GenericSearchController<T, ID, S extends Filter> extends GenericCon
   }
   search(req: Request, res: Response) {
     const s = fromRequest<S>(req, buildArray(this.array, resources.fields, this.excluding))
-    const l = getParameters(s, this.config)
+    const l = getParameters(s)
     const s2 = format(s, this.dates, this.numbers)
     this.find(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
