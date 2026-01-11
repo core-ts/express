@@ -160,9 +160,8 @@ export function queryPage<F extends Filter>(req: Request, filter?: F): number {
   ;(filter as any)[resources.page] = n
   return n
 }
-export function getOffset(limit: number, page: number): number {
-  const offset = limit * (page - 1)
-  return offset < 0 ? 0 : offset
+export function getOffset(limit: number, page?: number): number {
+  return !page || page <= 1 || limit <= 0 ? 0 : limit * (page - 1)
 }
 
 export function getPageTotal(pageSize?: number, total?: number): number {

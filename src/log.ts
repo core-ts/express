@@ -1,6 +1,4 @@
-import { NextFunction } from "express"
-import { ParamsDictionary, Request, Response } from "express-serve-static-core"
-import { ParsedQs } from "qs"
+import { NextFunction, Request, Response } from "express"
 import { PassThrough } from "stream"
 import { resources } from "./resources"
 
@@ -64,16 +62,12 @@ export interface Middleware {
 }
 const o = "OPTIONS"
 export class MiddlewareLogger {
-  constructor(
-    public write: (msg: string, m?: SimpleMap) => void,
-    conf?: LogConf,
-    public build?: (req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, m: SimpleMap) => SimpleMap,
-  ) {
+  constructor(public write: (msg: string, m?: SimpleMap) => void, conf?: LogConf, public build?: (req: Request, m: SimpleMap) => SimpleMap) {
     this.log = this.log.bind(this)
     this.conf = createConfig(conf)
   }
   conf: MiddleLog
-  log(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>, number>, next: NextFunction) {
+  log(req: Request, res: Response, next: NextFunction) {
     const m = req.method
     if (m !== o && this.conf.log && !skip(this.conf.skips, req.originalUrl)) {
       const start = process.hrtime()
@@ -134,18 +128,16 @@ export class MiddlewareLogger {
     }
   }
 }
-const mapResponseBody = (res: Response<any, Record<string, any>, number>, chunks: Uint8Array[]) => {
+const mapResponseBody = (res: Response, chunks: Uint8Array[]) => {
   const defaultWrite = res.write.bind(res)
   const defaultEnd = res.end.bind(res)
   const ps = new PassThrough()
 
   ps.on("data", (data: any) => chunks.push(data))
-
   ;(res as any).write = (...args: any) => {
     ;(ps as any).write(...args)
     ;(defaultWrite as any)(...args)
   }
-
   ;(res as any).end = (...args: any) => {
     ps.end(...args)
     defaultEnd(...args)
