@@ -11,17 +11,17 @@ export function buildAndCheckId<ID>(req: Request, res: Response, keys?: Attribut
 }
 export function buildId<T>(req: Request, attrs?: Attribute[]): T | undefined {
   if (!attrs || attrs.length === 0) {
-    const id = req.params["id"]
+    const id = req.params["id"] as string
     if (id && id.length > 0) {
       return id as any
     }
     return undefined
   }
   if (attrs && attrs.length === 1) {
-    let id = req.params["id"]
+    let id = req.params["id"] as string
     const n = attrs[0].name
     if ((!id || id.length === 0) && n && n.length > 0) {
-      id = req.params[n]
+      id = req.params[n] as string
     }
     if (id && id.length > 0) {
       if (attrs[0].type === "integer" || attrs[0].type === "number") {
@@ -47,7 +47,7 @@ export function buildId<T>(req: Request, attrs?: Attribute[]): T | undefined {
       if (isNaN(v as any)) {
         return undefined
       }
-      ids[attr.name] = parseFloat(v)
+      ids[attr.name] = parseFloat(v as string)
     } else {
       ids[attr.name] = v
     }

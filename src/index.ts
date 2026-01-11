@@ -20,7 +20,7 @@ export {
   Controller as Handler,
   LoadSearchController as LoadSearchHandler,
   Service as LowCodeService,
-  SearchController as SearchHandler
+  SearchController as SearchHandler,
 }
 
 export * from "./access"
@@ -57,7 +57,7 @@ export class SavedController {
   protected id: string
   save(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
-    const id = req.params[this.id]
+    const id = req.params[this.id] as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -76,7 +76,7 @@ export class SavedController {
   }
   remove(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
-    const id = req.params[this.id]
+    const id = req.params[this.id] as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -110,7 +110,7 @@ export class FollowController {
   protected id: string
   follow(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
-    const id = req.params[this.id]
+    const id = req.params[this.id] as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -129,7 +129,7 @@ export class FollowController {
   }
   unfollow(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
-    const id = req.params[this.id]
+    const id = req.params[this.id] as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -162,9 +162,9 @@ export class UserReactionController {
   }
   id: string
   react(req: Request, res: Response) {
-    const id = req.params.id
-    const author = req.params.author
-    const reaction = req.params.reaction
+    const id = req.params.id as string
+    const author = req.params.author as string
+    const reaction = req.params.reaction as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -185,9 +185,9 @@ export class UserReactionController {
       .catch((err) => handleError(err, res, this.log))
   }
   unreact(req: Request, res: Response) {
-    const id = req.params.id
-    const author = req.params.author
-    const reaction = req.params.reaction
+    const id = req.params.id as string
+    const author = req.params.author as string
+    const reaction = req.params.reaction as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return
@@ -208,8 +208,8 @@ export class UserReactionController {
       .catch((err) => handleError(err, res, this.log))
   }
   checkReaction(req: Request, res: Response) {
-    const id = req.params.id
-    const author = req.params.author
+    const id = req.params.id as string
+    const author = req.params.author as string
     if (!id || id.length === 0) {
       res.status(400).end(`'${this.id}' cannot be empty`)
       return

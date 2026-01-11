@@ -117,7 +117,7 @@ export function queryRequiredNumber(req: Request, res: Response, name: string): 
     res.status(400).end(`'${name}' is not a valid number`)
     return undefined
   }
-  const n = parseFloat(v)
+  const n = parseFloat(v as string)
   return n
 }
 export function queryNumber(req: Request, name: string, d: number): number {
@@ -129,7 +129,7 @@ export function queryNumber(req: Request, name: string, d: number): number {
   if (isNaN(v as any)) {
     return d
   }
-  const n = parseFloat(v)
+  const n = parseFloat(v as string)
   return n
 }
 export function queryRequiredDate(req: Request, res: Response, name: string): Date | undefined {
@@ -142,7 +142,7 @@ export function queryRequiredDate(req: Request, res: Response, name: string): Da
     res.status(400).end(`'${name}' cannot be empty`)
     return undefined
   }
-  const date = new Date(v)
+  const date = new Date(v as string)
   if (date.toString() === "Invalid Date") {
     res.status(400).end(`'${name}' is not a valid date`)
     return undefined
@@ -156,7 +156,7 @@ export function queryDate(req: Request, name: string, d?: Date): Date | undefine
     if (!v || v.length === 0) {
       return d
     }
-    const date = new Date(v)
+    const date = new Date(v as string)
     if (date.toString() === "Invalid Date") {
       return d
     }
@@ -170,11 +170,11 @@ export function param(req: Request, res: Response, name: string): string | undef
     res.status(400).end(`'${name}' cannot be empty`)
     return undefined
   }
-  return v
+  return v as string
 }
 export const getParam = param
 export function params(req: Request, name: string, d?: string[], split?: string): string[] | undefined {
-  const v = req.params[name]
+  const v = req.params[name] as string
   if (!v || v.length === 0) {
     return d
   }
@@ -185,7 +185,7 @@ export function params(req: Request, name: string, d?: string[], split?: string)
 }
 export const getParams = params
 export function getRequiredParameters(req: Request, res: Response, name: string, split?: string): string[] | undefined {
-  const v = req.params[name]
+  const v = req.params[name] as string
   if (!v || v.length === 0) {
     res.status(400).end(`'${name}' cannot be empty`)
     return undefined
@@ -205,7 +205,7 @@ export function getRequiredNumber(req: Request, res: Response, name: string): nu
     res.status(400).end(`'${name}' must be a number`)
     return undefined
   }
-  const n = parseFloat(v)
+  const n = parseFloat(v as string)
   return n
 }
 export function getNumber(req: Request, name: string, d?: number): number | undefined {
@@ -216,7 +216,7 @@ export function getNumber(req: Request, name: string, d?: number): number | unde
   if (isNaN(v as any)) {
     return d
   }
-  const n = parseFloat(v)
+  const n = parseFloat(v as string)
   return n
 }
 export function getInteger(req: Request, name: string, d?: number): number | undefined {
@@ -227,7 +227,7 @@ export function getInteger(req: Request, name: string, d?: number): number | und
   if (isNaN(v as any)) {
     return d
   }
-  const n = parseFloat(v)
+  const n = parseFloat(v as string)
   const s = n.toFixed(0)
   return parseFloat(s)
 }
@@ -237,7 +237,7 @@ export function getRequiredDate(req: Request, res: Response, name: string): Date
     res.status(400).end(`'${name}' cannot be empty`)
     return undefined
   }
-  const date = new Date(v)
+  const date = new Date(v as string)
   if (date.toString() === "Invalid Date") {
     res.status(400).end(`'${name}' must be a date`)
     return undefined
@@ -249,7 +249,7 @@ export function getDate(req: Request, name: string, d?: Date): Date | undefined 
   if (!v || v.length === 0) {
     return d
   }
-  const date = new Date(v)
+  const date = new Date(v as string)
   if (date.toString() === "Invalid Date") {
     return d
   }
