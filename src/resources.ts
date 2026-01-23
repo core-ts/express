@@ -26,7 +26,10 @@ export class resources {
 }
 export function getView(req: Request, view: string): string {
   const partial = req.query[resources.partial]
-  return partial == "true" ? resources.pages + "/" + view : view
+  return partial === "true" ? resources.pages + "/" + view : view
+}
+export function isPartial(req: Request): boolean {
+  return req.query[resources.partial] === "true"
 }
 
 export interface Validator<T> {
@@ -35,7 +38,10 @@ export interface Validator<T> {
 
 // tslint:disable-next-line:max-classes-per-file
 export class TypeChecker {
-  constructor(public attributes: Attributes, public allowUndefined?: boolean) {
+  constructor(
+    public attributes: Attributes,
+    public allowUndefined?: boolean,
+  ) {
     this.check = this.check.bind(this)
   }
   check(req: Request, res: Response, next: NextFunction): void {
