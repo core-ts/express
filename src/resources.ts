@@ -20,6 +20,7 @@ export class resources {
   static sort = "sort"
   static fields = "fields"
   static partial = "partial"
+  static subPartial = "sub"
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[]
   static encoding?: BufferEncoding = "utf-8"
@@ -31,7 +32,9 @@ export function getView(req: Request, view: string): string {
 export function isPartial(req: Request): boolean {
   return req.query[resources.partial] === "true"
 }
-
+export function isSubPartial(req: Request): boolean {
+  return req.query[resources.subPartial] === "true"
+}
 export interface Validator<T> {
   validate(obj: T, resource?: StringMap, patch?: boolean): Promise<ErrorMessage[]>
 }
