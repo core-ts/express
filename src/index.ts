@@ -47,7 +47,12 @@ export interface SavedService {
   remove(userId: string, id: string): Promise<number>
 }
 export class SavedController {
-  constructor(protected savedService: SavedService, protected log: (msg: string) => void, id?: string, userId?: string) {
+  constructor(
+    protected savedService: SavedService,
+    protected log: (msg: string) => void,
+    id?: string,
+    userId?: string,
+  ) {
     this.userId = userId && userId.length > 0 ? userId : "userId"
     this.id = id && id.length > 0 ? id : "id"
     this.save = this.save.bind(this)
@@ -100,7 +105,12 @@ export interface FollowService {
 }
 // tslint:disable-next-line:max-classes-per-file
 export class FollowController {
-  constructor(protected service: FollowService, protected log: Log, id?: string, userId?: string) {
+  constructor(
+    protected service: FollowService,
+    protected log: Log,
+    id?: string,
+    userId?: string,
+  ) {
     this.userId = userId && userId.length > 0 ? userId : "userId"
     this.id = id && id.length > 0 ? id : "id"
     this.follow = this.follow.bind(this)
@@ -154,7 +164,13 @@ export interface ReactService {
 }
 // tslint:disable-next-line:max-classes-per-file
 export class UserReactionController {
-  constructor(public log: Log, public service: ReactService, public author: string, id: string, public reaction: string) {
+  constructor(
+    public log: Log,
+    public service: ReactService,
+    public author: string,
+    id: string,
+    public reaction: string,
+  ) {
     this.id = id && id.length > 0 ? id : "id"
     this.react = this.react.bind(this)
     this.unreact = this.unreact.bind(this)
@@ -272,6 +288,43 @@ export function toMap(errors: ErrorMessage[]): ErrorMap {
 interface SaveService<T> {
   create(obj: T, ctx?: any): Promise<number | T | ErrorMessage[]>
   update(obj: T, ctx?: any): Promise<number | T | ErrorMessage[]>
+}
+export function isSuccessful<T>(res: number | T | ErrorMessage[]): boolean {
+  return (typeof res === "number" && res <= 0) || Array.isArray(res) ? false : true
+}
+export function afterCreated<T>(res: Response, result: number | T | ErrorMessage[], returnObject?: boolean): void {
+  if (Array.isArray(result)) {
+    res.status(422).json(result).end()
+  } else if (typeof result === "number") {
+    if (result > 0) {
+      res.status(200).json(result).end()
+    } else {
+      res.status(409).json(result).end()
+    }
+  } else {
+    res
+      .status(201)
+      .json(returnObject ? result : 1)
+      .end()
+  }
+}
+export function respond<T>(res: Response, result: number | T | ErrorMessage[], returnObject?: boolean): void {
+  if (Array.isArray(result)) {
+    res.status(422).json(result).end()
+  } else if (typeof result === "number") {
+    if (result > 0) {
+      res.status(200).json(result).end()
+    } else if (result === 0) {
+      res.status(410).json(result).end()
+    } else {
+      res.status(409).json(result).end()
+    }
+  } else {
+    res
+      .status(200)
+      .json(returnObject ? result : 1)
+      .end()
+  }
 }
 export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveService<T>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean) {
   if (!isEdit) {
