@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { checkId, create, getStatusCode, update } from "./edit"
-import { handleError, Log } from "./http"
+import { handleError } from "./http"
 import { LoadController } from "./LoadController"
 import { Attribute, Attributes, ErrorMessage } from "./metadata"
 import { resources, StringMap } from "./resources"
@@ -21,13 +21,12 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
   metadata?: Attributes
   returnNumber?: boolean
   constructor(
-    log: Log,
     public service: GenericService<T, ID, number | T | ErrorMessage[]>,
     public build?: Build<T>,
     public validate?: Validate<T>,
     returnNumber?: boolean,
   ) {
-    super(log, service)
+    super(service)
     this.returnNumber = returnNumber
     if (service.metadata) {
       const m = service.metadata()
@@ -45,18 +44,18 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
     }
   }
   create(req: Request, res: Response): void {
-    validateAndCreate(req, res, this.service.create, this.log, this.validate, this.build)
+    validateAndCreate(req, res, this.service.create, this.validate, this.build)
   }
   update(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.update)
     if (id) {
-      validateAndUpdate(res, req.body, false, this.service.update, this.log, this.validate, undefined, this.build)
+      validateAndUpdate(res, req.body, false, this.service.update, this.validate, undefined, this.build)
     }
   }
   patch(req: Request, res: Response): void {
     const id = buildAndCheckIdWithBody<T, ID, any>(req, res, this.keys, this.service.patch)
     if (id && this.service.patch) {
-      validateAndUpdate(res, req.body, true, this.service.patch, this.log, this.validate, undefined, this.build)
+      validateAndUpdate(res, req.body, true, this.service.patch, this.validate, undefined, this.build)
     }
   }
   delete(req: Request, res: Response): void {
@@ -70,20 +69,12 @@ export class GenericController<T, ID> extends LoadController<T, ID> {
           .then((count) => {
             res.status(getDeleteStatus(count)).json(count).end()
           })
-          .catch((err) => handleError(err, res, this.log))
+          .catch((err) => handleError(err, res))
       }
     }
   }
 }
-export function validateAndCreate<T>(
-  req: Request,
-  res: Response,
-  save: Save<T>,
-  log: Log,
-  validate?: Validate<T>,
-  build?: Build<T>,
-  returnNumber?: boolean,
-): void {
+export function validateAndCreate<T>(req: Request, res: Response, save: Save<T>, validate?: Validate<T>, build?: Build<T>, returnNumber?: boolean): void {
   const obj = req.body
   if (!obj || obj === "") {
     res.status(400).end("The request body cannot be empty.")
@@ -97,12 +88,12 @@ export function validateAndCreate<T>(
             if (build) {
               build(res, obj, true)
             }
-            create(res, obj, save, log, returnNumber)
+            create(res, obj, save, returnNumber)
           }
         })
-        .catch((err) => handleError(err, res, log))
+        .catch((err) => handleError(err, res))
     } else {
-      create(res, obj, save, log, returnNumber)
+      create(res, obj, save, returnNumber)
     }
   }
 }
@@ -111,7 +102,6 @@ export function validateAndUpdate<T>(
   obj: T,
   isPatch: boolean,
   save: Save<T>,
-  log: Log,
   validate?: Validate<T>,
   resource?: StringMap,
   build?: Build<T>,
@@ -126,12 +116,12 @@ export function validateAndUpdate<T>(
           if (build) {
             build(res, obj, false, isPatch)
           }
-          update(res, obj, save, log, returnNumber)
+          update(res, obj, save, returnNumber)
         }
       })
-      .catch((err) => handleError(err, res, log))
+      .catch((err) => handleError(err, res))
   } else {
-    update(res, obj, save, log, returnNumber)
+    update(res, obj, save, returnNumber)
   }
 }
 export function buildAndCheckIdWithBody<T, ID, R>(req: Request, res: Response, keys?: Attribute[], patch?: (obj: T, ctx?: any) => Promise<R>): ID | undefined {

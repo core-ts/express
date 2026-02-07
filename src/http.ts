@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { Attribute } from "./metadata"
+import { resources } from "./resources"
 
 export type Log = (msg: string) => void
 export type LogFunc = Log
@@ -17,12 +18,17 @@ Object.defineProperty(Error.prototype, "toJSON", {
   configurable: true,
   writable: true,
 })
-export function handleError(err: any, res: Response, log?: (msg: string) => void) {
-  if (log) {
-    log(toString(err))
+export function handleError(err: any, res: Response) {
+  if (resources.log) {
+    resources.log(toString(err))
     res.status(500).end("Internal Server Error")
   } else {
-    res.status(500).end(toString(err))
+    if (resources.returnServerError) {
+      res.status(500).end(toString(err))
+    } else {
+      console.error(toString(err))
+      res.status(500).end("Internal Server Error")
+    }
   }
 }
 export const error = handleError

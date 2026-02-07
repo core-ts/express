@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { attrs, handleError, Log, minimize, queryNumber, respondModel } from "./http"
+import { attrs, handleError, minimize, queryNumber, respondModel } from "./http"
 import { Attribute, Attributes } from "./metadata"
 import { buildAndCheckId, buildKeys } from "./view"
 
@@ -40,7 +40,7 @@ function getKeysFunc<T, ID>(viewService: ViewService<T, ID> | Load<T, ID>, keys?
 export class LoadController<T, ID> {
   protected keys?: Attribute[]
   protected view: Load<T, ID>
-  constructor(protected log: Log, viewService: ViewService<T, ID> | Load<T, ID>, keys?: Attributes | Attribute[] | string[]) {
+  constructor(viewService: ViewService<T, ID> | Load<T, ID>, keys?: Attributes | Attribute[] | string[]) {
     this.load = this.load.bind(this)
     this.view = getViewFunc(viewService)
     this.keys = getKeysFunc(viewService, keys)
@@ -50,14 +50,13 @@ export class LoadController<T, ID> {
     if (id) {
       this.view(id)
         .then((obj) => respondModel(minimize(obj), res))
-        .catch((err) => handleError(err, res, this.log))
+        .catch((err) => handleError(err, res))
     }
   }
 }
 // tslint:disable-next-line:max-classes-per-file
 export class ItemController<T> {
   constructor(
-    protected log: Log,
     private loadData: (keyword: string, max?: number) => Promise<T>,
     name?: string,
     protected param?: boolean,
@@ -88,7 +87,7 @@ export class ItemController<T> {
         const max = queryNumber(req, this.maxName, this.max)
         this.loadData(s, max)
           .then((result) => respondModel(minimize(result), res))
-          .catch((err) => handleError(err, res, this.log))
+          .catch((err) => handleError(err, res))
       }
     }
   }

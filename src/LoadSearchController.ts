@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { handleError, Log } from "./http"
+import { handleError } from "./http"
 import { LoadController, ViewService } from "./LoadController"
 import { Attribute, Attributes } from "./metadata"
 import { resources } from "./resources"
@@ -19,7 +19,6 @@ export interface SearchManager {
   load(req: Request, res: Response): void
 }
 export function useSearchController<T, ID, S extends Filter>(
-  log: Log,
   find: (s: S, limit: number, page?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
   viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
   array?: string[],
@@ -28,7 +27,7 @@ export function useSearchController<T, ID, S extends Filter>(
   keys?: Attributes | Attribute[] | string[],
   config?: SearchConfig | boolean,
 ): Search {
-  const c = new LoadSearchController(log, find, viewService, keys, config, dates, numbers)
+  const c = new LoadSearchController(find, viewService, keys, config, dates, numbers)
   c.array = array
   return c
 }
@@ -43,7 +42,6 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
   excluding?: string
   array?: string[]
   constructor(
-    log: Log,
     public find: (s: S, limit: number, page?: number | string, fields?: string[]) => Promise<SearchResult<T>>,
     viewService: ViewService<T, ID> | ((id: ID, ctx?: any) => Promise<T>),
     keys?: Attributes | Attribute[] | string[],
@@ -51,7 +49,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
     dates?: string[],
     numbers?: string[],
   ) {
-    super(log, viewService, keys)
+    super(viewService, keys)
     this.search = this.search.bind(this)
     if (config) {
       if (typeof config === "boolean") {
@@ -76,7 +74,7 @@ export class LoadSearchController<T, ID, S extends Filter> extends LoadControlle
     const s2 = format(s, this.dates, this.numbers)
     this.find(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export class QueryController<T, ID, S extends Filter> extends LoadController<T, ID> {
@@ -86,8 +84,14 @@ export class QueryController<T, ID, S extends Filter> extends LoadController<T, 
   numbers?: string[]
   excluding?: string
   array?: string[]
-  constructor(log: Log, protected query: Query<T, ID, S>, config?: SearchConfig | boolean, dates?: string[], numbers?: string[], array?: string[]) {
-    super(log, query)
+  constructor(
+    protected query: Query<T, ID, S>,
+    config?: SearchConfig | boolean,
+    dates?: string[],
+    numbers?: string[],
+    array?: string[],
+  ) {
+    super(query)
     this.search = this.search.bind(this)
     this.array = array
     if (config) {
@@ -114,7 +118,7 @@ export class QueryController<T, ID, S extends Filter> extends LoadController<T, 
     this.query
       .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export { QueryController as QueryHandler }

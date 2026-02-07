@@ -21,6 +21,8 @@ export class resources {
   static fields = "fields"
   static partial = "partial"
   static subPartial = "sub"
+  static log?: (msg: string) => void
+  static returnServerError?: boolean
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[]
   static encoding?: BufferEncoding = "utf-8"

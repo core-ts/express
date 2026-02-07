@@ -77,7 +77,7 @@ export class SavedController {
         const status = result > 0 ? 200 : result === 0 ? 409 : 422
         res.status(status).json(result).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
   remove(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
@@ -96,7 +96,7 @@ export class SavedController {
         const status = result > 0 ? 200 : 410
         res.status(status).json(result).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export interface FollowService {
@@ -135,7 +135,7 @@ export class FollowController {
         const status = result > 0 ? 200 : 409
         res.status(status).json(result).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
   unfollow(req: Request, res: Response) {
     const userId: string = res.locals[this.userId]
@@ -154,7 +154,7 @@ export class FollowController {
         const status = result > 0 ? 200 : 410
         res.status(status).json(result).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export interface ReactService {
@@ -198,7 +198,7 @@ export class UserReactionController {
       .then((count) => {
         res.status(200).json(count).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
   unreact(req: Request, res: Response) {
     const id = req.params.id as string
@@ -221,7 +221,7 @@ export class UserReactionController {
       .then((count) => {
         res.status(200).json(count).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
   checkReaction(req: Request, res: Response) {
     const id = req.params.id as string
@@ -239,7 +239,7 @@ export class UserReactionController {
       .then((count) => {
         res.status(200).json(count).end()
       })
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export const ReactController = UserReactionController
@@ -326,7 +326,7 @@ export function respond<T>(res: Response, result: number | T | ErrorMessage[], r
       .end()
   }
 }
-export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveService<T>, log: (msg: string, ctx?: any) => void, returnNumber?: boolean) {
+export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveService<T>, returnNumber?: boolean) {
   if (!isEdit) {
     service
       .create(obj)
@@ -339,7 +339,7 @@ export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveSer
           res.status(201).json(obj).end()
         }
       })
-      .catch((err) => handleError(err, res, log))
+      .catch((err) => handleError(err, res))
   } else {
     service
       .update(obj)
@@ -357,7 +357,7 @@ export function save<T>(isEdit: boolean, res: Response, obj: T, service: SaveSer
             .end()
         }
       })
-      .catch((err) => handleError(err, res, log))
+      .catch((err) => handleError(err, res))
   }
 }
 const map: StringMap = {

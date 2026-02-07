@@ -62,13 +62,7 @@ export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   }
   return true
 }
-export function create<T>(
-  res: Response,
-  obj: T,
-  insert: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>,
-  log: (msg: string, ctx?: any) => void,
-  returnNumber?: boolean,
-): void {
+export function create<T>(res: Response, obj: T, insert: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>, returnNumber?: boolean): void {
   insert(obj)
     .then((result) => {
       if (typeof result === "number") {
@@ -89,15 +83,9 @@ export function create<T>(
           .end()
       }
     })
-    .catch((err) => handleError(err, res, log))
+    .catch((err) => handleError(err, res))
 }
-export function update<T>(
-  res: Response,
-  obj: T,
-  save: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>,
-  log: (msg: string, ctx?: any) => void,
-  returnNumber?: boolean,
-): void {
+export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Promise<number | T | ErrorMessage[]>, returnNumber?: boolean): void {
   save(obj)
     .then((result) => {
       if (typeof result === "number") {
@@ -120,7 +108,7 @@ export function update<T>(
           .end()
       }
     })
-    .catch((err) => handleError(err, res, log))
+    .catch((err) => handleError(err, res))
 }
 export function isTypeError(errs: ErrorMessage[]): boolean {
   if (!errs) {

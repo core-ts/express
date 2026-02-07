@@ -16,7 +16,6 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
   excluding?: string
   array?: string[]
   constructor(
-    log: Log,
     public lowCodeService: Service<T, ID, number | ErrorMessage[], S>,
     config?: SearchConfig,
     build?: Build<T>,
@@ -24,7 +23,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
     dates?: string[],
     numbers?: string[],
   ) {
-    super(log, lowCodeService, build, validate)
+    super(lowCodeService, build, validate)
     this.search = this.search.bind(this)
     this.config = initializeConfig(config)
     if (this.config) {
@@ -44,7 +43,7 @@ export class LowcodeController<T, ID, S extends Filter> extends GenericControlle
     this.lowCodeService
       .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
 export { LowcodeController as LowcodeHandler }
@@ -64,7 +63,7 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
     dates?: string[],
     numbers?: string[],
   ) {
-    super(log, lowCodeService, build, validate)
+    super(lowCodeService, build, validate)
     this.search = this.search.bind(this)
     this.config = initializeConfig(config)
     if (this.config) {
@@ -84,6 +83,6 @@ export class Controller<T, ID, S extends Filter> extends GenericController<T, ID
     this.lowCodeService
       .search(s2, l.limit, l.pageOrNextPageToken, l.fields)
       .then((result) => jsonResult(res, result, this.csv, l.fields, this.config))
-      .catch((err) => handleError(err, res, this.log))
+      .catch((err) => handleError(err, res))
   }
 }
