@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { GenericController } from "./GenericController"
 import { GenericSearchController } from "./GenericSearchController"
 import { HealthController } from "./HealthController"
-import { handleError, Log, query } from "./http"
+import { handleError, query } from "./http"
 import { LoadController } from "./LoadController"
 import { LoadSearchController } from "./LoadSearchController"
 import { LogController } from "./LogController"
@@ -49,7 +49,6 @@ export interface SavedService {
 export class SavedController {
   constructor(
     protected savedService: SavedService,
-    protected log: (msg: string) => void,
     id?: string,
     userId?: string,
   ) {
@@ -107,7 +106,6 @@ export interface FollowService {
 export class FollowController {
   constructor(
     protected service: FollowService,
-    protected log: Log,
     id?: string,
     userId?: string,
   ) {
@@ -165,11 +163,10 @@ export interface ReactService {
 // tslint:disable-next-line:max-classes-per-file
 export class UserReactionController {
   constructor(
-    public log: Log,
-    public service: ReactService,
-    public author: string,
+    protected service: ReactService,
+    protected author: string,
     id: string,
-    public reaction: string,
+    protected reaction: string,
   ) {
     this.id = id && id.length > 0 ? id : "id"
     this.react = this.react.bind(this)
