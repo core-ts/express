@@ -372,7 +372,7 @@ export function escapeHTML(input: string): string {
 }
 export function generateChip(value: string, text: string, noClose?: boolean, hasStar?: boolean): string {
   const s = noClose ? "" : `<span class="close" onclick="removeChip(event)"></span>`
-  const t = hasStar ? `<i class="star highlight"></i>` : ""
+  const t = hasStar ? `<i class="star"></i>` : ""
   return `<div class="chip" data-value="${escapeHTML(value)}">${escapeHTML(text)}${t}${s}</div>`
 }
 export function generateTags(v?: string[] | null, noClose?: boolean): string {
