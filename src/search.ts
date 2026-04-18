@@ -271,6 +271,7 @@ export function removeField(search: string, fieldName: string): string {
 export function removePage(search: string): string {
   search = removeField(search, resources.page)
   search = removeField(search, resources.partial)
+  search = removeField(search, resources.subPartial)
   return search
 }
 export function buildPageSearch(search: string): string {
@@ -284,6 +285,7 @@ export function buildPageSearchFromUrl(url: string): string {
 export function removeSort(search: string): string {
   search = removeField(search, resources.sort)
   search = removeField(search, resources.partial)
+  search = removeField(search, resources.subPartial)
   return search
 }
 export interface Sort {
