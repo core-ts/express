@@ -31,24 +31,31 @@ export class resources {
       return false
     }
     const c = errs[errs.length - 1].code
-    if (
-      c === "type" ||
-      c === "string" ||
-      c === "number" ||
-      c === "date" ||
-      c === "boolean" ||
-      c === "strings" ||
-      c === "numbers" ||
-      c === "integers" ||
-      c === "dates" ||
-      c === "datetimes" ||
-      c === "booleans"
-    ) {
+    if (c === "type") {
+      return false
+    }
+    const x = errorMap.get(c)
+    if (x) {
       return true
     }
     return false
   }
 }
+const errorMap = new Map<string, string>([
+  ["type", "1"],
+  ["string", "1"],
+  ["number", "1"],
+  ["integer", "1"],
+  ["date", "1"],
+  ["datetime", "1"],
+  ["boolean", "1"],
+  ["strings", "1"],
+  ["numbers", "1"],
+  ["integers", "1"],
+  ["dates", "1"],
+  ["datetimes", "1"],
+  ["booleans", "1"],
+])
 export function getView(req: Request, view: string): string {
   const partial = req.query[resources.partial]
   return partial === "true" ? resources.pages + "/" + view : view
