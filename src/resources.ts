@@ -31,14 +31,7 @@ export class resources {
       return false
     }
     const c = errs[errs.length - 1].code
-    if (c === "type") {
-      return true
-    }
-    const x = errorMap.get(c)
-    if (x) {
-      return true
-    }
-    return false
+    return c === "type" ? true : false
   }
 }
 const errorMap = new Map<string, string>([
