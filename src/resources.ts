@@ -26,6 +26,30 @@ export class resources {
   static createValidator?: <T>(attributes: Attributes, allowUndefined?: boolean, max?: number) => Validator<T>
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[]
   static encoding?: BufferEncoding = "utf-8"
+  static isTypeError(errs: ErrorMessage[]): boolean {
+    if (!errs || errs.length) {
+      return false
+    }
+    for (const err of errs) {
+      const c = err.code
+      if (
+        c === "type" ||
+        c === "string" ||
+        c === "number" ||
+        c === "date" ||
+        c === "boolean" ||
+        c === "strings" ||
+        c === "numbers" ||
+        c === "integers" ||
+        c === "dates" ||
+        c === "datetimes" ||
+        c === "booleans"
+      ) {
+        return true
+      }
+    }
+    return false
+  }
 }
 export function getView(req: Request, view: string): string {
   const partial = req.query[resources.partial]

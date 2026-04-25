@@ -251,7 +251,7 @@ export function getField(search: string, fieldName: string): string {
   const j = search.indexOf("&", i + fieldName.length)
   return j >= 0 ? search.substring(i, j) : search.substring(i)
 }
-export function removeField(search: string, fieldName: string): string {
+export function removeFieldByName(search: string, fieldName: string): string {
   let i = search.indexOf(fieldName + "=")
   if (i < 0) {
     return search
@@ -268,10 +268,18 @@ export function removeField(search: string, fieldName: string): string {
   const j = search.indexOf("&", i + fieldName.length)
   return j >= 0 ? search.substring(0, i) + search.substring(j + 1) : search.substring(0, i - 1)
 }
+export function removeField(search: string, fieldName: string, excludePartial?: boolean): string {
+  search = removeFieldByName(search, resources.page)
+  if (!excludePartial) {
+    search = removeFieldByName(search, resources.partial)
+    search = removeFieldByName(search, resources.subPartial)
+  }
+  return search
+}
 export function removePage(search: string): string {
-  search = removeField(search, resources.page)
-  search = removeField(search, resources.partial)
-  search = removeField(search, resources.subPartial)
+  search = removeFieldByName(search, resources.page)
+  search = removeFieldByName(search, resources.partial)
+  search = removeFieldByName(search, resources.subPartial)
   return search
 }
 export function buildPageSearch(search: string): string {
@@ -283,9 +291,9 @@ export function buildPageSearchFromUrl(url: string): string {
   return buildPageSearch(search)
 }
 export function removeSort(search: string): string {
-  search = removeField(search, resources.sort)
-  search = removeField(search, resources.partial)
-  search = removeField(search, resources.subPartial)
+  search = removeFieldByName(search, resources.sort)
+  search = removeFieldByName(search, resources.partial)
+  search = removeFieldByName(search, resources.subPartial)
   return search
 }
 export interface Sort {

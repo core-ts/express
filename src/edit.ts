@@ -1,4 +1,5 @@
 import { Response } from "express"
+import { resources } from "resources"
 import { handleError } from "./http"
 import { Attribute, ErrorMessage } from "./metadata"
 /*
@@ -110,32 +111,8 @@ export function update<T>(res: Response, obj: T, save: (obj: T, ctx?: any) => Pr
     })
     .catch((err) => handleError(err, res))
 }
-export function isTypeError(errs: ErrorMessage[]): boolean {
-  if (!errs) {
-    return false
-  }
-  for (const err of errs) {
-    const c = err.code
-    if (
-      c === "type" ||
-      c === "string" ||
-      c === "number" ||
-      c === "date" ||
-      c === "boolean" ||
-      c === "strings" ||
-      c === "numbers" ||
-      c === "integers" ||
-      c === "dates" ||
-      c === "datetimes" ||
-      c === "booleans"
-    ) {
-      return true
-    }
-  }
-  return false
-}
 export function getStatusCode(errs: ErrorMessage[]): number {
-  return isTypeError(errs) ? 400 : 422
+  return resources.isTypeError(errs) ? 400 : 422
 }
 export function respondError(res: Response, errors: ErrorMessage[]) {
   res.status(getStatusCode(errors)).json(errors).end()
