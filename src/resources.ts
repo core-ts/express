@@ -32,7 +32,7 @@ export class resources {
     }
     const c = errs[errs.length - 1].code
     if (c === "type") {
-      return false
+      return true
     }
     const x = errorMap.get(c)
     if (x) {
