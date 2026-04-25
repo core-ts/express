@@ -27,7 +27,7 @@ export class resources {
   static check: (obj: any, attributes: Attributes, allowUndefined?: boolean, patch?: boolean) => ErrorMessage[]
   static encoding?: BufferEncoding = "utf-8"
   static isTypeError(errs: ErrorMessage[]): boolean {
-    if (!errs || errs.length) {
+    if (!errs || errs.length <= 0) {
       return false
     }
     for (const err of errs) {
