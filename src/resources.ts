@@ -30,23 +30,21 @@ export class resources {
     if (!errs || errs.length <= 0) {
       return false
     }
-    for (const err of errs) {
-      const c = err.code
-      if (
-        c === "type" ||
-        c === "string" ||
-        c === "number" ||
-        c === "date" ||
-        c === "boolean" ||
-        c === "strings" ||
-        c === "numbers" ||
-        c === "integers" ||
-        c === "dates" ||
-        c === "datetimes" ||
-        c === "booleans"
-      ) {
-        return true
-      }
+    const c = errs[errs.length - 1].code
+    if (
+      c === "type" ||
+      c === "string" ||
+      c === "number" ||
+      c === "date" ||
+      c === "boolean" ||
+      c === "strings" ||
+      c === "numbers" ||
+      c === "integers" ||
+      c === "dates" ||
+      c === "datetimes" ||
+      c === "booleans"
+    ) {
+      return true
     }
     return false
   }
