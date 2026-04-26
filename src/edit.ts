@@ -1,5 +1,5 @@
 import { Response } from "express"
-import { resources } from "resources"
+import { resources } from "./resources"
 import { handleError } from "./http"
 import { Attribute, ErrorMessage } from "./metadata"
 
