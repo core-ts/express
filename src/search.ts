@@ -269,7 +269,7 @@ export function removeFieldByName(search: string, fieldName: string): string {
   return j >= 0 ? search.substring(0, i) + search.substring(j + 1) : search.substring(0, i - 1)
 }
 export function removeField(search: string, fieldName: string, excludePartial?: boolean): string {
-  search = removeFieldByName(search, resources.page)
+  search = removeFieldByName(search, fieldName)
   if (!excludePartial) {
     search = removeFieldByName(search, resources.partial)
     search = removeFieldByName(search, resources.subPartial)
