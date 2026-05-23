@@ -346,6 +346,30 @@ export function buildSortSearch(search: string, fields: string[], sortStr?: stri
   }
   return sorts
 }
+interface Item {
+  id?: string
+  value: string
+  text?: string
+}
+export function buildSorts(sorts: Item[], prefix: string) {
+  const l = sorts.length
+  for (let i = 0; i < l; i++) {
+    sorts[i].value = prefix + sorts[i].value
+  }
+}
+export function getSortText(sorts: Item[], sort: string | undefined, defaultText?: string): string | undefined {
+  if (!sort) {
+    return defaultText
+  }
+  const l = sorts.length
+  for (let i = 0; i < l; i++) {
+    if (sorts[i].value === sort) {
+      return sorts[i].text
+    }
+  }
+  return defaultText
+}
+
 export function clone(obj: any): any {
   if (!obj) {
     return obj
