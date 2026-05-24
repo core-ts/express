@@ -1,6 +1,6 @@
 {
   "name": "express-core-web",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "express-core-web",
   "main": "./lib/index.js",
   "types": "./src/index.ts",
