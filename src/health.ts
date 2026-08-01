@@ -1,3 +1,5 @@
+import { Request, Response } from "express"
+
 export type HealthStatus = "UP" | "DOWN"
 export interface HealthMap {
   [key: string]: Health
@@ -17,34 +19,47 @@ export interface HealthChecker {
 }
 
 export async function health(checkers: HealthChecker[]): Promise<Health> {
-  const p: Health = { status: "UP" }
-  const total = checkers.length - 1
-  let count = 0
-  p.details = {} as HealthMap
-  for (const checker of checkers) {
-    const sub: Health = { status: "UP" }
-    try {
-      const r = await checker.check()
-      if (r && Object.keys(r).length > 0) {
-        sub.data = r
-      }
-      p.details[checker.name()] = sub
-      if (count >= total) {
-        return p
-      } else {
-        count++
-      }
-    } catch (err) {
-      sub.status = "DOWN"
-      p.status = "DOWN"
-      sub.data = checker.build({} as AnyMap, err)
-      p.details[checker.name()] = sub
-      if (count >= total) {
-        return p
-      } else {
-        count++
-      }
-    }
+  const p: Health = {
+    status: "UP",
+    details: {},
   }
+
+  await Promise.all(
+    checkers.map(async (checker) => {
+      const sub: Health = {
+        status: "UP",
+      }
+
+      try {
+        const data = await checker.check()
+
+        if (data && Object.keys(data).length > 0) {
+          sub.data = data
+        }
+      } catch (err) {
+        sub.status = "DOWN"
+        p.status = "DOWN"
+        sub.data = checker.build({}, err)
+      }
+
+      p.details![checker.name()] = sub
+    }),
+  )
+
   return p
+}
+
+export class HealthController {
+  constructor(protected checkers: HealthChecker[]) {
+    this.check = this.check.bind(this)
+  }
+  check(req: Request, res: Response) {
+    health(this.checkers).then((r) => {
+      if (r.status === "UP") {
+        res.status(200).json(r).end()
+      } else {
+        res.status(500).json(r).end()
+      }
+    })
+  }
 }
