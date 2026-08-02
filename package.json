@@ -1,7 +1,7 @@
 {
-  "name": "express-core-web",
-  "version": "0.1.7",
-  "description": "express-core-web is a core extension for express framework.",
+  "name": "express-web-kit",
+  "version": "0.0.2",
+  "description": "express-web-kit is a core web framework for express",
   "main": "./lib/index.js",
   "types": "./src/index.ts",
   "scripts": {

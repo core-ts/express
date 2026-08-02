@@ -1,8 +1,8 @@
-# express-core-web
+# express-web-kit
 
 A lightweight toolkit for building clean, modular, and maintainable **Express.js** applications.
 
-`express-core-web` provides reusable utilities for REST APIs, including request parsing, response helpers, validation integration, search and pagination, logging middleware, localization, and common HTTP utilities. It is designed to reduce boilerplate while remaining framework-agnostic and easy to integrate into existing Express applications.
+`express-web-kit` provides reusable utilities for REST APIs, including request parsing, response helpers, validation integration, search and pagination, logging middleware, localization, and common HTTP utilities. It is designed to reduce boilerplate while remaining framework-agnostic and easy to integrate into existing Express applications.
 
 ---
 
@@ -22,7 +22,7 @@ A lightweight toolkit for building clean, modular, and maintainable **Express.js
 
 ---
 
-# Why express-core-web?
+# Why express-web-kit?
 
 Building REST APIs with Express often involves writing the same code repeatedly:
 
@@ -33,14 +33,14 @@ Building REST APIs with Express often involves writing the same code repeatedly:
 - Logging requests
 - Managing localization
 
-`express-core-web` provides reusable building blocks for these common tasks, allowing you to focus on business logic instead of infrastructure code.
+`express-web-kit` provides reusable building blocks for these common tasks, allowing you to focus on business logic instead of infrastructure code.
 
 ---
 
 # Installation
 
 ```bash
-npm install express-core-web
+npm install express-web-kit
 ```
 
 ---
@@ -142,7 +142,7 @@ These helpers reduce repetitive pagination logic across controllers.
 
 ## Validation
 
-`express-core-web` integrates with validation libraries through a simple abstraction.
+`express-web-kit` integrates with validation libraries through a simple abstraction.
 
 This allows applications to plug in any validation implementation without coupling controllers to a specific library.
 
@@ -249,7 +249,7 @@ src/
 
 # Related Projects
 
-`express-core-web` is part of the Core TS ecosystem and works well with:
+`express-web-kit` is part of the Core TS ecosystem and works well with:
 
 - **mongodb-kit** — Generic MongoDB repositories
 - **postgres-kit** — PostgreSQL integration
@@ -266,7 +266,7 @@ These libraries can be used independently or combined to build complete enterpri
 
 # Sample Application
 
-See the **mongo-modular-sample** project for a complete example demonstrating how to build a modular microservice using `express-core-web` together with other Core TS libraries.
+See the **mongo-modular-sample** project for a complete example demonstrating how to build a modular microservice using `express-web-kit` together with other Core TS libraries.
 
 ---
 
