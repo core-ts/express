@@ -1,7 +1,7 @@
 {
   "name": "express-core-web",
-  "version": "0.1.6",
-  "description": "express-core-web",
+  "version": "0.1.7",
+  "description": "express-core-web is a core extension for express framework.",
   "main": "./lib/index.js",
   "types": "./src/index.ts",
   "scripts": {
