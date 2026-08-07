@@ -1,7 +1,7 @@
 import { Response } from "express"
-import { resources } from "./resources"
 import { handleError } from "./http"
 import { Attribute, ErrorMessage } from "./metadata"
+import { resources } from "./resources"
 
 export function checkId<T, ID>(obj: T, id: ID, keys?: Attribute[]): boolean {
   const n: string = keys && keys.length === 1 && keys[0].name ? keys[0].name : "id"

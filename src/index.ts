@@ -1,17 +1,15 @@
 import { Request, Response } from "express"
 import { GenericController } from "./GenericController"
 import { GenericSearchController } from "./GenericSearchController"
-import { HealthController } from "./health"
 import { handleError, query } from "./http"
 import { LoadController } from "./LoadController"
 import { LoadSearchController } from "./LoadSearchController"
-import { LogController } from "./LogController"
 import { Controller, Service } from "./LowCodeController"
 import { ErrorMessage } from "./metadata"
 import { resources, StringMap } from "./resources"
 import { SearchController } from "./SearchController"
 
-export { HealthController as HealthHandler, LoadController as LoadHandler, LogController as LogHandler, LoadController as ViewHandler }
+export { LoadController as LoadHandler, LoadController as ViewHandler }
 // export {LoadController as ViewController};
 
 export {

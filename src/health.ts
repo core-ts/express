@@ -63,3 +63,4 @@ export class HealthController {
     })
   }
 }
+export const HealthHandler = HealthController
