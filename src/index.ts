@@ -69,10 +69,7 @@ export class SavedController {
     }
     this.savedService
       .save(userId, id)
-      .then((result) => {
-        const status = result > 0 ? 200 : result === 0 ? 409 : 422
-        res.status(status).json(result).end()
-      })
+      .then((result) => res.status(200).json(result).end())
       .catch((err) => handleError(err, res))
   }
   remove(req: Request, res: Response) {
@@ -88,10 +85,7 @@ export class SavedController {
     }
     this.savedService
       .remove(userId, id)
-      .then((result) => {
-        const status = result > 0 ? 200 : 410
-        res.status(status).json(result).end()
-      })
+      .then((result) => res.status(200).json(result).end())
       .catch((err) => handleError(err, res))
   }
 }
@@ -126,10 +120,7 @@ export class FollowController {
     }
     this.service
       .follow(userId, id)
-      .then((result) => {
-        const status = result > 0 ? 200 : 409
-        res.status(status).json(result).end()
-      })
+      .then((result) => res.status(200).json(result).end())
       .catch((err) => handleError(err, res))
   }
   unfollow(req: Request, res: Response) {
@@ -145,99 +136,10 @@ export class FollowController {
     }
     this.service
       .unfollow(userId, id)
-      .then((result) => {
-        const status = result > 0 ? 200 : 410
-        res.status(status).json(result).end()
-      })
+      .then((result) => res.status(200).json(result).end())
       .catch((err) => handleError(err, res))
   }
 }
-export interface ReactService {
-  react(id: string, author: string, reaction: string): Promise<number>
-  unreact(id: string, author: string, reaction: string): Promise<number>
-  checkReaction(id: string, author: string): Promise<number>
-}
-// tslint:disable-next-line:max-classes-per-file
-export class UserReactionController {
-  constructor(
-    protected service: ReactService,
-    protected author: string,
-    id: string,
-    protected reaction: string,
-  ) {
-    this.id = id && id.length > 0 ? id : "id"
-    this.react = this.react.bind(this)
-    this.unreact = this.unreact.bind(this)
-    this.checkReaction = this.checkReaction.bind(this)
-  }
-  id: string
-  react(req: Request, res: Response) {
-    const id = req.params.id as string
-    const author = req.params.author as string
-    const reaction = req.params.reaction as string
-    if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
-    }
-    if (!author || author.length === 0) {
-      res.status(400).end(`'${this.author}' cannot be empty`)
-      return
-    }
-    if (!reaction || reaction.length === 0) {
-      res.status(400).end(`'${this.reaction}' cannot be empty`)
-      return
-    }
-    this.service
-      .react(id, author, reaction)
-      .then((count) => {
-        res.status(200).json(count).end()
-      })
-      .catch((err) => handleError(err, res))
-  }
-  unreact(req: Request, res: Response) {
-    const id = req.params.id as string
-    const author = req.params.author as string
-    const reaction = req.params.reaction as string
-    if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
-    }
-    if (!author || author.length === 0) {
-      res.status(400).end(`'${this.author}' cannot be empty`)
-      return
-    }
-    if (!reaction || reaction.length === 0) {
-      res.status(400).end(`'${this.reaction}' cannot be empty`)
-      return
-    }
-    this.service
-      .unreact(id, author, reaction)
-      .then((count) => {
-        res.status(200).json(count).end()
-      })
-      .catch((err) => handleError(err, res))
-  }
-  checkReaction(req: Request, res: Response) {
-    const id = req.params.id as string
-    const author = req.params.author as string
-    if (!id || id.length === 0) {
-      res.status(400).end(`'${this.id}' cannot be empty`)
-      return
-    }
-    if (!author || author.length === 0) {
-      res.status(400).end(`'${this.author}' cannot be empty`)
-      return
-    }
-    this.service
-      .checkReaction(id, author)
-      .then((count) => {
-        res.status(200).json(count).end()
-      })
-      .catch((err) => handleError(err, res))
-  }
-}
-export const ReactController = UserReactionController
-export const ReactionController = UserReactionController
 
 export function checked(s: string[] | string | undefined, v: string): boolean | undefined {
   if (s) {
