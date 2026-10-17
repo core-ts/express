@@ -22,7 +22,7 @@ export interface MiddleLog {
   status: string
   size: string
 }
-export interface SimpleMap {
+export interface Context {
   [key: string]: string | number | boolean | Date
 }
 export function createConfig(cfg?: MiddlewareLogConfig): MiddleLog {
@@ -53,9 +53,9 @@ export interface Middleware {
 const o = "OPTIONS"
 export class MiddlewareLogger {
   constructor(
-    protected write: (msg: string, map?: SimpleMap) => void,
+    protected write: (msg: string, map?: Context) => void,
     config?: MiddlewareLogConfig,
-    protected buildContext?: (req: Request, map: SimpleMap) => SimpleMap,
+    protected buildContext?: (req: Request, map: Context) => Context,
     protected encryptResponse?: (rs: string) => string,
     protected encryptRequest: (body: any) => string = JSON.stringify,
   ) {
@@ -75,7 +75,7 @@ export class MiddlewareLogger {
       const msg = `${mt} ${req.originalUrl}`
       if (this.config.separate && r) {
         if (this.config.request.length > 0) {
-          const op: SimpleMap = {}
+          const op: Context = {}
           op[rq] = this.encryptRequest(req.body)
           if (this.buildContext) {
             const op2 = this.buildContext(req, op)
@@ -89,7 +89,7 @@ export class MiddlewareLogger {
       mapResponseBody(res, chunks)
       res.on("finish", () => {
         const duration = getDurationInMilliseconds(start)
-        const op: SimpleMap = {}
+        const op: Context = {}
         if (r && !this.config.separate && this.config.request.length > 0) {
           op[rq] = this.encryptRequest(req.body)
         }
