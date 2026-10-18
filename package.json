@@ -1,6 +1,6 @@
 {
   "name": "express-web-kit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "express-web-kit is a core web framework for express",
   "main": "./lib/index.js",
   "types": "./src/index.ts",
