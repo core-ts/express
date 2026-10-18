@@ -65,7 +65,7 @@ export class MiddlewareLogger {
   config: MiddleLog
   log(req: Request, res: Response, next: NextFunction) {
     const mt = req.method
-    if (mt !== o && this.config.log && !this.config.skips.includes(req.path)) {
+    if (mt !== o && this.config.log && !req.is("multipart/form-data") && !this.config.skips.includes(req.path)) {
       const start = process.hrtime()
       const rq = this.config.request
       let r = false
